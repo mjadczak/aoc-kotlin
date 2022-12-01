@@ -6,24 +6,20 @@ fun main() {
     // Part 1
     aocInput(22, 1).useLines { lines ->
         lines
-            .splitBy { line -> line.isEmpty() }
-            .map { strs ->
-                strs.sumOf { Integer.parseInt(it) }
-            }
+            .splitBy(String::isEmpty)
+            .map { it.sumOf(Integer::parseInt) }
             .max()
-            .let { println(it) }
+            .let(::println)
     }
 
     // Part 2
     aocInput(22, 1).useLines { lines ->
         lines
-            .splitBy { line -> line.isEmpty() }
-            .map { strs ->
-                strs.sumOf { Integer.parseInt(it) }
-            }
+            .splitBy(String::isEmpty)
+            .map { it.sumOf(Integer::parseInt) }
             .sortedDescending()
             .take(3)
             .sum()
-            .let { println(it) }
+            .let(::println)
     }
 }
