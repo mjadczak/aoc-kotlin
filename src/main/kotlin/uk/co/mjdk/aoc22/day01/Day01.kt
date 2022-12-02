@@ -1,4 +1,4 @@
-package uk.co.mjdk.aoc22
+package uk.co.mjdk.aoc22.day01
 
 import uk.co.mjdk.aoc.*
 
