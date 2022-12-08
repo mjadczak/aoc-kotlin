@@ -2,7 +2,9 @@ package uk.co.mjdk.aoc22.day05
 
 import uk.co.mjdk.aoc.aocInput
 
-fun main() {
+data class Instruction(val numberToMove: Int, val fromIdx: Int, val toIdx: Int)
+
+fun parseInput(): Pair<List<ArrayDeque<Char>>, List<Instruction>> {
     val inputStr = aocInput(22, 5).use { it.readText() }
     val (stackStr, instrStr) = inputStr.split("\n\n")
     val stackLines = stackStr.lines()
@@ -23,14 +25,45 @@ fun main() {
     }
 
     val pat = Regex("""move (\d+) from (\d) to (\d)""")
-    for (line in instrStr.lineSequence()) {
-        val match = pat.matchEntire(line) ?: continue
+    val instrs = instrStr.lines().filterNot(String::isBlank).map {
+        val match = pat.matchEntire(it)!!
         val (numMove, fromIdx, toIdx) = match.groupValues.drop(1).map(Integer::parseInt)
-        repeat(numMove) {
-            stacks[toIdx - 1].addFirst(stacks[fromIdx - 1].removeFirst())
+        Instruction(numMove, fromIdx - 1, toIdx - 1)
+    }
+
+    return stacks to instrs
+}
+
+fun part1() {
+    val (stacks, instructions) = parseInput()
+    instructions.forEach { instr ->
+        repeat(instr.numberToMove) {
+            stacks[instr.toIdx].addFirst(stacks[instr.fromIdx].removeFirst())
         }
     }
 
     val msg = stacks.map { it.first() }.joinToString(separator = "")
     println(msg)
+}
+
+fun part2() {
+    val (stacks, instructions) = parseInput()
+    instructions.forEach { instr ->
+        val crane = ArrayDeque<Char>(instr.numberToMove)
+        repeat(instr.numberToMove) {
+            crane.addFirst(stacks[instr.fromIdx].removeFirst())
+        }
+        repeat(instr.numberToMove) {
+            stacks[instr.toIdx].addFirst(crane.removeFirst())
+        }
+    }
+
+    val msg = stacks.map { it.first() }.joinToString(separator = "")
+    println(msg)
+}
+
+fun main() {
+    part1()
+
+    part2()
 }
