@@ -24,7 +24,7 @@ fun parsePatch(): List<List<Tree>> {
     }
 }
 
-fun main() {
+fun part1() {
     val patch = parsePatch()
     val rows = patch.count()
     val cols = patch[0].count()
@@ -79,4 +79,59 @@ fun main() {
 
     val numVisible = patch.asSequence().flatten().count { it.visibility.isVisible() }
     println(numVisible)
+}
+
+fun part2() {
+    val patch = parsePatch()
+    val rows = patch.count()
+    val cols = patch[0].count()
+
+    // I can't see an optimised way to calculate this in an inductive way as above, so meh, n^2 it is
+    var maxScore = 0
+    (0 until rows).forEach { row ->
+        (0 until cols).forEach { col ->
+            val tree = patch[row][col]
+
+            var topView = 0;
+            for (r in (row - 1) downTo 0) {
+                topView += 1
+                if (patch[r][col].height >= tree.height) {
+                    break
+                }
+            }
+
+            var rightView = 0;
+            for (c in (col + 1) until cols) {
+                rightView += 1
+                if (patch[row][c].height >= tree.height) {
+                    break
+                }
+            }
+
+            var bottomView = 0;
+            for (r in (row + 1) until rows) {
+                bottomView += 1
+                if (patch[r][col].height >= tree.height) {
+                    break
+                }
+            }
+
+            var leftView = 0;
+            for (c in (col - 1) downTo 0) {
+                leftView += 1
+                if (patch[row][c].height >= tree.height) {
+                    break
+                }
+            }
+
+            maxScore = max(maxScore, topView * rightView * bottomView * leftView)
+        }
+    }
+
+    println(maxScore)
+}
+
+fun main() {
+    part1()
+    part2()
 }
