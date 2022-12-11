@@ -40,7 +40,11 @@ fun newTailPos(tail: Pos, head: Pos): Pos {
             head.copy(y = head.y + 1)
         }
     } else {
-        throw IllegalStateException("Should not end up exactly diagonal with distance > 1, but had xDist=$xDist, yDist=$yDist")
+        // We're diagonal, so move to the correct corner
+        val newX = if (xDist > 0) head.x - 1 else head.x + 1
+        val newY = if (yDist > 0) head.y - 1 else head.y + 1
+
+        return Pos(newX, newY)
     }
 }
 
@@ -63,7 +67,7 @@ enum class Dir {
     }
 }
 
-fun main() {
+fun part1() {
     var head = Pos(0, 0)
     var tail = Pos(0, 0)
     val visited = mutableSetOf(tail)
@@ -79,6 +83,37 @@ fun main() {
                 visited += tail
             }
         }
-        print(visited.count())
+        println(visited.count())
     }
+}
+
+fun part2() {
+    val numKnots = 10
+    var knots = List(numKnots) { Pos(0, 0) }
+    val visited = mutableSetOf(knots[9])
+
+    aocInput(22, 9).useLines { lines ->
+        lines.forEach { line ->
+            val (sDir, sNum) = line.split(' ')
+            val num = sNum.toInt()
+            val dir = Dir.parse(sDir)
+            repeat(num) {
+                knots = buildList(numKnots) {
+                    add(knots[0].moved(dir))
+
+                    for (i in 1 until numKnots) {
+                        add(newTailPos(knots[i], get(i - 1)))
+                    }
+                }
+                assert(knots.size == numKnots)
+                visited += knots.last()
+            }
+        }
+        println(visited.count())
+    }
+}
+
+fun main() {
+    part1()
+    part2()
 }
