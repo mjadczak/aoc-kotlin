@@ -48,27 +48,57 @@ fun parseInput(): Input {
     }
 }
 
-fun main() {
+fun part1() {
     val (start, end, grid) = parseInput()
     grid[start]!!.distance = 0
-    var current = grid[start]!!
     val destination = grid[end]!!
     val pq = PriorityQueue<Cell>(grid.size * grid[0].size, Comparator.comparingInt { it.distance })
-    pq.add(current)
+    pq.add(grid[start]!!)
     while (!destination.visited) {
+        val current = pq.remove()
         current.pos.neighbours().map(grid::get).filterNotNull().filterNot(Cell::visited)
             .filter { (it.height - current.height) <= 1 }.forEach { neighbour ->
                 val tentativeDistance = current.distance + 1
                 if (tentativeDistance < neighbour.distance) {
                     neighbour.distance = tentativeDistance
-                    // This is not great algorithmically, but yet again I'm too lazy to implement a queue with increase-priority
+                    // We actually don't need to remove it, as it will always languish at the end
+                    // pq.remove(neighbour)
+                    pq.add(neighbour)
+                }
+            }
+        current.visited = true
+    }
+
+    println(destination.distance)
+}
+
+fun part2() {
+    val (_, start, grid) = parseInput() // end -> start
+    grid[start]!!.distance = 0
+    val aDistances = mutableListOf<Int>()
+    val pq = PriorityQueue<Cell>(grid.size * grid[0].size, Comparator.comparingInt { it.distance })
+    pq.add(grid[start]!!)
+    while (!pq.isEmpty()) {
+        val current = pq.remove()
+        current.pos.neighbours().map(grid::get).filterNotNull().filterNot(Cell::visited)
+            .filter { (current.height - it.height) <= 1 }.forEach { neighbour ->
+                val tentativeDistance = current.distance + 1
+                if (tentativeDistance < neighbour.distance) {
+                    neighbour.distance = tentativeDistance
                     pq.remove(neighbour)
                     pq.add(neighbour)
                 }
             }
         current.visited = true
-        current = pq.remove()
+        if (current.height == 0) {
+            aDistances.add(current.distance)
+        }
     }
 
-    println(destination.distance)
+    println(aDistances.min())
+}
+
+fun main() {
+    part1()
+    part2()
 }
