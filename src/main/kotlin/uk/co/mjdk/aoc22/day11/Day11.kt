@@ -2,16 +2,42 @@ package uk.co.mjdk.aoc22.day11
 
 import uk.co.mjdk.aoc.aocInput
 
-enum class Operation {
-    Multiply,
-    Add,
-    Square
+sealed interface Operation {
+    fun apply(worry: Long): Long
+
+    object Square : Operation {
+        override fun apply(worry: Long): Long = worry * worry
+    }
+
+    data class Multiply(val operand: Long) : Operation {
+        override fun apply(worry: Long): Long = worry * operand
+    }
+
+    data class Add(val operand: Long) : Operation {
+        override fun apply(worry: Long): Long = worry + operand
+    }
+}
+
+sealed interface WorryManagement {
+    fun apply(worry: Long): Long
+
+    object DivideByThree : WorryManagement {
+        override fun apply(worry: Long): Long = worry / 3
+    }
+
+    data class Mod(val modulo: Long) : WorryManagement {
+        override fun apply(worry: Long): Long = worry % modulo
+    }
+}
+
+enum class WorryManagementStrategy {
+    DivideByThree,
+    Modulo
 }
 
 data class MonkeySpec(
     val operation: Operation,
-    val operand: Int,
-    val divisibleTest: Int,
+    val divisibleTest: Long,
     val trueTarget: Int,
     val falseTarget: Int
 )
@@ -19,20 +45,16 @@ data class MonkeySpec(
 data class Monkey(
     val index: Int,
     val spec: MonkeySpec,
-    val items: MutableList<Int>,
-    var inspectionCounter: Int = 0
+    val items: MutableList<Long>,
+    var inspectionCounter: Long = 0
 ) {
-    fun inspectItems(): Sequence<Pair<Int, Int>> = sequence {
+    fun inspectItems(strategy: WorryManagement): Sequence<Pair<Int, Long>> = sequence {
         items.forEach { item ->
             var worry = item
             inspectionCounter += 1
-            when (spec.operation) {
-                Operation.Square -> worry *= worry
-                Operation.Add -> worry += spec.operand
-                Operation.Multiply -> worry *= spec.operand
-            }
-            worry /= 3
-            val idx = if (worry % spec.divisibleTest == 0) spec.trueTarget else spec.falseTarget
+            worry = spec.operation.apply(worry)
+            worry = strategy.apply(worry)
+            val idx = if (worry % spec.divisibleTest == 0L) spec.trueTarget else spec.falseTarget
             yield(idx to worry)
         }
         items.clear()
@@ -61,29 +83,33 @@ fun getMonkeys(): List<Monkey> {
         val strTrueIdx = iv.value.groupValues[6]
         val strFalseIdx = iv.value.groupValues[7]
 
-        val (operation, operand) = if (strOperand == "old") {
+        val operation = if (strOperand == "old") {
             assert(strOperation == "*")
-            Operation.Square to -1
+            Operation.Square
         } else {
-            val operation = if (strOperation == "*") {
-                Operation.Multiply
-            } else if (strOperation == "+") {
-                Operation.Add
-            } else {
-                throw IllegalArgumentException("Unrecognised operation $strOperation")
+            when (strOperation) {
+                "*" -> {
+                    Operation.Multiply(strOperand.toLong())
+                }
+
+                "+" -> {
+                    Operation.Add(strOperand.toLong())
+                }
+
+                else -> {
+                    throw IllegalArgumentException("Unrecognised operation $strOperation")
+                }
             }
-            operation to strOperand.toInt()
         }
 
         val spec = MonkeySpec(
             operation,
-            operand,
-            strDivisible.toInt(),
+            strDivisible.toLong(),
             strTrueIdx.toInt(),
             strFalseIdx.toInt()
         )
 
-        val items = strItems.split(", ").map { it.toInt() }.toMutableList()
+        val items = strItems.split(", ").map { it.toLong() }.toMutableList()
         val index = strIdx.toInt()
         assert(iv.index == index)
 
@@ -91,17 +117,27 @@ fun getMonkeys(): List<Monkey> {
     }.toList()
 }
 
-fun main() {
+fun run(rounds: Int, strategy: WorryManagementStrategy) {
     val monkeys = getMonkeys()
-    repeat(20) {
+    val worryManagement = when (strategy) {
+        WorryManagementStrategy.DivideByThree -> WorryManagement.DivideByThree
+        WorryManagementStrategy.Modulo -> WorryManagement.Mod(monkeys.map { it.spec.divisibleTest }.reduce(Long::times))
+    }
+    repeat(rounds) {
         monkeys.forEach { monkey ->
-            monkey.inspectItems().forEach { (targetIdx, item) ->
+            monkey.inspectItems(worryManagement).forEach { (targetIdx, item) ->
                 assert(targetIdx != monkey.index)
                 monkeys[targetIdx].items.add(item)
             }
         }
     }
 
-    val monkeyBusiness = monkeys.map { it.inspectionCounter }.sortedDescending().asSequence().take(2).reduce(Int::times)
+    val monkeyBusiness =
+        monkeys.map { it.inspectionCounter }.sortedDescending().asSequence().take(2).reduce(Long::times)
     println(monkeyBusiness)
+}
+
+fun main() {
+    run(20, WorryManagementStrategy.DivideByThree)
+    run(10000, WorryManagementStrategy.Modulo)
 }
