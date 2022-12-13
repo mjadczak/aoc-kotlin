@@ -84,17 +84,34 @@ sealed interface Node : Comparable<Node> {
 
 }
 
-fun main() {
+fun part1() {
     aocInput(22, 13).useLines { lines ->
-        lines
-            .filterNot { it.isBlank() }
-            .map(Node::parse)
-            .chunked(2) { (a, b) ->
+        lines.filterNot { it.isBlank() }.map(Node::parse).chunked(2) { (a, b) ->
                 a to b
-            }
-            .withIndex()
-            .filter { iv -> iv.value.first < iv.value.second }
-            .sumOf { it.index + 1 }
-            .let(::println)
+            }.withIndex().filter { iv -> iv.value.first < iv.value.second }.sumOf { it.index + 1 }.let(::println)
     }
+}
+
+fun part2() {
+    aocInput(22, 13).useLines { lines ->
+        val packets = lines.filterNot { it.isBlank() }.map(Node::parse).toMutableList()
+
+        val d1 = Node.Seq(listOf(Node.Seq(listOf(Node.Leaf(2)))))
+        val d2 = Node.Seq(listOf(Node.Seq(listOf(Node.Leaf(6)))))
+
+        packets.add(d1)
+        packets.add(d2)
+
+        packets.sort()
+
+        val i1 = packets.indexOf(d1) + 1
+        val i2 = packets.indexOf(d2) + 1
+
+        println(i1 * i2)
+    }
+}
+
+fun main() {
+    part1()
+    part2()
 }
