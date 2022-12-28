@@ -11,5 +11,5 @@ repositories {
 }
 
 dependencies {
-
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
 }
