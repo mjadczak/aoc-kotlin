@@ -10,10 +10,9 @@ fun aocInput(year: Int, day: Int): BufferedReader =
         .bufferedReader(StandardCharsets.UTF_8)
 
 fun <T> Sequence<T>.splitBy(shouldSplit: (T) -> Boolean): Sequence<List<T>> {
-    val underlying = this
     return sequence {
         val buffer = mutableListOf<T>()
-        for (current in underlying) {
+        for (current in this@splitBy) {
             if (shouldSplit(current)) {
                 yield(buffer.toList())
                 buffer.clear()
@@ -24,5 +23,11 @@ fun <T> Sequence<T>.splitBy(shouldSplit: (T) -> Boolean): Sequence<List<T>> {
         if (buffer.isNotEmpty()) {
             yield(buffer)
         }
+    }
+}
+
+fun <T> Collection<T>.repeatForever(): Sequence<T> = sequence {
+    while(true) {
+        yieldAll(this@repeatForever)
     }
 }
