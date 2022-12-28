@@ -3,6 +3,7 @@ package uk.co.mjdk.aoc22.day16
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentHashMapOf
 import uk.co.mjdk.aoc.aocInput
+import java.lang.Integer.min
 
 data class Valve(val id: String, val flow: Int, val destinations: Set<String>)
 
@@ -15,10 +16,13 @@ fun getValves(): Map<String, Valve> = aocInput(22, 16).useLines { lines ->
     }.toMap()
 }
 
-fun main() {
+fun simulate(timeLimit: Int, isElephant: Boolean) {
     // Use Floyd-Warshall to get all pairs of shortest paths
     // Discard any flow=0 nodes
     // Use a DFS to explore all possibilities while being able to one-hop between nodes
+
+    // This could undoubtedly be optimised further, which would be particularly beneficial for Part 2 which considers
+    // the square of all possibilities. But it runs fast enough to get the answer, and I'm behind on questions already.
 
     val valves = getValves()
     val keyList = valves.keys.toList().sorted()
@@ -58,7 +62,7 @@ fun main() {
                     continue
                 }
                 val openTime = currentTime + dest.value + 1
-                if (openTime >= 30) {
+                if (openTime >= timeLimit) {
                     continue
                 }
                 yieldAll(search(dest.key.second, openTime, startedValves.put(dest.key.second, openTime)))
@@ -66,11 +70,44 @@ fun main() {
         }
     }
 
-    fun evaluate(startedValves: PersistentMap<String, Int>): Int = startedValves.map { (key, openTime) ->
-        val timeOpen = 30 - openTime
+    fun evaluate(startedValves: Map<String, Int>): Int = startedValves.map { (key, openTime) ->
+        val timeOpen = timeLimit - openTime
         valves[key]!!.flow * timeOpen
     }.sum()
 
-    val bestPressure = search("AA", 0, persistentHashMapOf("AA" to 0)).map(::evaluate).max()
+    fun evaluate(startedValves1: Map<String, Int>, startedValves2: Map<String, Int>): Int =
+        (startedValves1.keys + startedValves2.keys).map { key ->
+            val openTime = if (key !in startedValves2) {
+                startedValves1[key]!!
+            } else if (key !in startedValves1) {
+                startedValves2[key]!!
+            } else {
+                min(startedValves1[key]!!, startedValves2[key]!!)
+            }
+            val timeOpen = timeLimit - openTime
+            valves[key]!!.flow * timeOpen
+        }.sum()
+
+    val results =
+        if (isElephant) {
+            val allPoss = search("AA", 0, persistentHashMapOf("AA" to 0)).toList()
+            var done = 0
+            allPoss.asSequence().flatMap { me ->
+                print("\r${done}/${allPoss.size}")
+                done++
+                allPoss.asSequence().map { el ->
+                    evaluate(me, el)
+                }
+            }
+        } else {
+            search("AA", 0, persistentHashMapOf("AA" to 0)).map(::evaluate)
+        }
+    val bestPressure = results.max()
+    println()
     println(bestPressure)
+}
+
+fun main() {
+    simulate(30, false)
+    simulate(26, true)
 }
