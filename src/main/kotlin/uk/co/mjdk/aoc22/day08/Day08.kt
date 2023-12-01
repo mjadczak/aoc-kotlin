@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day08
 
-import uk.co.mjdk.aoc.aocInput
+import uk.co.mjdk.aoc.aocInputStored
 import kotlin.math.max
 
 class Visibility(
@@ -17,7 +17,7 @@ class MaxHeight(var fromTop: Int = 0, var fromRight: Int = 0, var fromBottom: In
 data class Tree(val height: Int, val visibility: Visibility = Visibility(), val maxHeight: MaxHeight = MaxHeight())
 
 fun parsePatch(): List<List<Tree>> {
-    aocInput(22, 8).useLines { lines ->
+    aocInputStored(22, 8).useLines { lines ->
         return lines.map { line ->
             line.map { Tree(it.digitToInt()) }.toList()
         }.toList()

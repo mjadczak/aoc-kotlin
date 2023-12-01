@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day02
 
-import uk.co.mjdk.aoc.aocInput
+import uk.co.mjdk.aoc.aocInputStored
 
 enum class Result {
     Win,
@@ -27,7 +27,7 @@ enum class Sign {
 
 fun main() {
     // Part 1
-    aocInput(22, 2).useLines { lines ->
+    aocInputStored(22, 2).useLines { lines ->
         lines
             .map {
                 assert(it.length == 3)
@@ -66,7 +66,7 @@ fun main() {
     }
 
     // Part 2
-    aocInput(22, 2).useLines { lines ->
+    aocInputStored(22, 2).useLines { lines ->
         lines
             .map {
                 assert(it.length == 3)

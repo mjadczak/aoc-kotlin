@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day15
 
-import uk.co.mjdk.aoc.aocInput
+import uk.co.mjdk.aoc.aocInputStored
 import kotlin.math.abs
 
 data class Pos(val x: Int, val y: Int) {
@@ -62,7 +62,7 @@ data class Line(val isPosGradient: Boolean, val yIntercept: Int) {
 
 val inputPat = Regex("""Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)""")
 
-fun getSensors(): List<Sensor> = aocInput(22, 15).useLines { lines ->
+fun getSensors(): List<Sensor> = aocInputStored(22, 15).useLines { lines ->
     lines.map { line ->
         val (x1, y1, x2, y2) = inputPat.matchEntire(line)!!.groupValues.drop(1).map { it.toInt() }
         Sensor(Pos(x1, y1), Pos(x2, y2))

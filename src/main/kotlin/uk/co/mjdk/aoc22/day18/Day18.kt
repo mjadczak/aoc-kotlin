@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day18
 
-import uk.co.mjdk.aoc.aocInput
+import uk.co.mjdk.aoc.aocInputStored
 
 data class Voxel(val x: Int, val y: Int, val z: Int) {
     fun neighbours(): Sequence<Voxel> = sequenceOf(
@@ -13,7 +13,7 @@ data class Voxel(val x: Int, val y: Int, val z: Int) {
     )
 }
 
-fun getVoxels(): Set<Voxel> = aocInput(22, 18).useLines { lines ->
+fun getVoxels(): Set<Voxel> = aocInputStored(22, 18).useLines { lines ->
     lines.map { line ->
         val (x, y, z) = line.split(',').map { it.toInt() }
         Voxel(x, y, z)

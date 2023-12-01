@@ -1,7 +1,6 @@
 package uk.co.mjdk.aoc22.day19
 
-import uk.co.mjdk.aoc.aocInput
-import java.util.EnumSet
+import uk.co.mjdk.aoc.aocInputStored
 
 val inputPat =
     Regex("""Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.""")
@@ -135,7 +134,7 @@ enum class RobotType {
     Geode
 }
 
-fun getBlueprints(): Map<Int, Blueprint> = aocInput(22, 19).useLines { lines ->
+fun getBlueprints(): Map<Int, Blueprint> = aocInputStored(22, 19).useLines { lines ->
     lines.map { line ->
         val vals = inputPat.matchEntire(line)!!.groupValues.drop(1).map { it.toInt() }
         vals[0] to Blueprint(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5], vals[6])

@@ -2,14 +2,14 @@ package uk.co.mjdk.aoc22.day16
 
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentHashMapOf
-import uk.co.mjdk.aoc.aocInput
+import uk.co.mjdk.aoc.aocInputStored
 import java.lang.Integer.min
 
 data class Valve(val id: String, val flow: Int, val destinations: Set<String>)
 
 val inputPat = Regex("""Valve (\w\w) has flow rate=(\d+); tunnels? leads? to valves? (.+)$""")
 
-fun getValves(): Map<String, Valve> = aocInput(22, 16).useLines { lines ->
+fun getValves(): Map<String, Valve> = aocInputStored(22, 16).useLines { lines ->
     lines.map { line ->
         val (id, flow, rest) = inputPat.matchEntire(line)!!.groupValues.drop(1)
         id to Valve(id, flow.toInt(), rest.split(", ").toSet())
