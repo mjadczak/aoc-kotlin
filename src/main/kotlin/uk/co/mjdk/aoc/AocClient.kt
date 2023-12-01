@@ -52,4 +52,5 @@ class AocClient {
         readInputFromCache(year, day) ?: fetchInput(year, day).also { writeInputToCache(year, day, it) }
 }
 
-fun aoc(year: Int, day: Int): String = AocClient().getInput(year, day)
+fun aoc(year: Int, day: Int, trimNewLine: Boolean = true): String =
+    AocClient().getInput(year, day).let { if (trimNewLine) it.trim() else it }
