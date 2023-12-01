@@ -1,6 +1,6 @@
 plugins {
     application
-    kotlin("jvm") version "1.7.21"
+    kotlin("jvm") version "1.9.21"
 }
 
 group = "uk.co.mjdk"
@@ -11,5 +11,14 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    compilerOptions {
+        progressiveMode = true
+    }
 }
