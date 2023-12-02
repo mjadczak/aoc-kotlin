@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day12
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 import java.util.PriorityQueue
 
 data class Pos(val row: Int, val col: Int) {
@@ -20,7 +20,7 @@ operator fun <T> List<List<T>>.get(pos: Pos): T? =
 data class Input(val start: Pos, val end: Pos, val grid: List<List<Cell>>)
 
 fun parseInput(): Input {
-    aocInputStored(22, 12).useLines { lines ->
+    aocReader(22, 12).useLines { lines ->
         var start: Pos? = null
         var end: Pos? = null
         val grid = lines.withIndex().map { (row, line) ->

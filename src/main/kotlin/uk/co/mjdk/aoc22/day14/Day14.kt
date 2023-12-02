@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day14
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 import kotlin.math.max
 import kotlin.math.min
 
@@ -42,7 +42,7 @@ class Grid() {
     fun yCount(): Int = grid[0].size
 }
 
-fun getGrid(): Grid = aocInputStored(22, 14).useLines { lines ->
+fun getGrid(): Grid = aocReader(22, 14).useLines { lines ->
     val grid = Grid()
     lines.forEach { line ->
         val tuples = line.split(" -> ").map {

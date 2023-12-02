@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day11
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 sealed interface Operation {
     fun apply(worry: Long): Long
@@ -73,7 +73,7 @@ val monkeyPat = Regex(
 )
 
 fun getMonkeys(): List<Monkey> {
-    val inputStr = aocInputStored(22, 11).use { it.readText() }
+    val inputStr = aocReader(22, 11).use { it.readText() }
     return monkeyPat.findAll(inputStr).withIndex().map { iv ->
         val strIdx = iv.value.groupValues[1]
         val strItems = iv.value.groupValues[2]

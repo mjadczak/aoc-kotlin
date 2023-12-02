@@ -1,10 +1,10 @@
 package uk.co.mjdk.aoc22.day03
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 fun main() {
     // Part 1
-    aocInputStored(22, 3).useLines { lines ->
+    aocReader(22, 3).useLines { lines ->
         lines
             .map { line ->
                 val length = line.length
@@ -27,7 +27,7 @@ fun main() {
     }
 
     // Part 2
-    aocInputStored(22, 3).useLines { lines ->
+    aocReader(22, 3).useLines { lines ->
         lines
             .map { it.toSet() }
             .chunked(3)

@@ -1,11 +1,11 @@
 package uk.co.mjdk.aoc22.day05
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 data class Instruction(val numberToMove: Int, val fromIdx: Int, val toIdx: Int)
 
 fun parseInput(): Pair<List<ArrayDeque<Char>>, List<Instruction>> {
-    val inputStr = aocInputStored(22, 5).use { it.readText() }
+    val inputStr = aocReader(22, 5).use { it.readText() }
     val (stackStr, instrStr) = inputStr.split("\n\n")
     val stackLines = stackStr.lines()
     val last = stackLines.last()

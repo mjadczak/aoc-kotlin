@@ -3,7 +3,7 @@ package uk.co.mjdk.aoc22.day01
 import uk.co.mjdk.aoc.*
 
 fun useCalorieSums(receiver: (Sequence<Int>) -> Unit) {
-    aocInputStored(22, 1).useLines { lines ->
+    aocReader(22, 1).useLines { lines ->
         lines
             .splitBy(String::isEmpty)
             .map { it.sumOf(Integer::parseInt) }

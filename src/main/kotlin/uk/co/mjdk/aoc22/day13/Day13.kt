@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day13
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 sealed interface Node : Comparable<Node> {
     data class Leaf(val value: Int) : Node {
@@ -85,7 +85,7 @@ sealed interface Node : Comparable<Node> {
 }
 
 fun part1() {
-    aocInputStored(22, 13).useLines { lines ->
+    aocReader(22, 13).useLines { lines ->
         lines.filterNot { it.isBlank() }.map(Node::parse).chunked(2) { (a, b) ->
                 a to b
             }.withIndex().filter { iv -> iv.value.first < iv.value.second }.sumOf { it.index + 1 }.let(::println)
@@ -93,7 +93,7 @@ fun part1() {
 }
 
 fun part2() {
-    aocInputStored(22, 13).useLines { lines ->
+    aocReader(22, 13).useLines { lines ->
         val packets = lines.filterNot { it.isBlank() }.map(Node::parse).toMutableList()
 
         val d1 = Node.Seq(listOf(Node.Seq(listOf(Node.Leaf(2)))))

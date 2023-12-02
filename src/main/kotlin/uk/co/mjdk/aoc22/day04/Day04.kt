@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day04
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 val linePat = Regex("""(\d+)-(\d+),(\d+)-(\d+)""")
 
@@ -17,7 +17,7 @@ fun IntRange.contains(other: IntRange): Boolean {
 
 fun main() {
     // Part 1
-    aocInputStored(22, 4).useLines { lines ->
+    aocReader(22, 4).useLines { lines ->
         lines
             .map { line ->
                 val res = linePat.matchEntire(line) ?: throw IllegalStateException()
@@ -30,7 +30,7 @@ fun main() {
     }
 
     // Part 2
-    aocInputStored(22, 4).useLines { lines ->
+    aocReader(22, 4).useLines { lines ->
         lines
             .map { line ->
                 val res = linePat.matchEntire(line) ?: throw IllegalStateException()

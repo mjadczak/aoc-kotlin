@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day09
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 import kotlin.math.abs
 
 data class Pos(val x: Int, val y: Int) {
@@ -72,7 +72,7 @@ fun part1() {
     var tail = Pos(0, 0)
     val visited = mutableSetOf(tail)
 
-    aocInputStored(22, 9).useLines { lines ->
+    aocReader(22, 9).useLines { lines ->
         lines.forEach { line ->
             val (sDir, sNum) = line.split(' ')
             val num = sNum.toInt()
@@ -92,7 +92,7 @@ fun part2() {
     var knots = List(numKnots) { Pos(0, 0) }
     val visited = mutableSetOf(knots[9])
 
-    aocInputStored(22, 9).useLines { lines ->
+    aocReader(22, 9).useLines { lines ->
         lines.forEach { line ->
             val (sDir, sNum) = line.split(' ')
             val num = sNum.toInt()

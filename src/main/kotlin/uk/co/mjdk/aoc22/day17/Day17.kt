@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day17
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 import uk.co.mjdk.aoc.repeatForever
 import kotlin.math.max
 
@@ -63,7 +63,7 @@ enum class Move {
     Right
 }
 
-fun getMovesList(): List<Move> = aocInputStored(22, 17).use { it.readText().trim() }.map {
+fun getMovesList(): List<Move> = aocReader(22, 17).use { it.readText().trim() }.map {
     when (it) {
         '<' -> Move.Left
         '>' -> Move.Right

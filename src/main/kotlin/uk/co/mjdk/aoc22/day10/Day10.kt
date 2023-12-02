@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day10
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 sealed interface Instruction {
     object Noop : Instruction
@@ -42,7 +42,7 @@ fun calculateStates(instructions: Sequence<Instruction>): Sequence<CpuState> = s
 }
 
 fun part1() {
-    aocInputStored(22, 10).useLines { lines ->
+    aocReader(22, 10).useLines { lines ->
         val states = calculateStates(lines.map(Instruction::parse))
 
         val statesOfInterest = states.filter { (it.cycleNum + 20) % 40 == 0 }.toList()
@@ -52,7 +52,7 @@ fun part1() {
 }
 
 fun part2() {
-    aocInputStored(22, 10).useLines { lines ->
+    aocReader(22, 10).useLines { lines ->
         val states = calculateStates(lines.map(Instruction::parse))
 
         val pixels = states.map {

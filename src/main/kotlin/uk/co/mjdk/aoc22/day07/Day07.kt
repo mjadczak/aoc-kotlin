@@ -1,6 +1,6 @@
 package uk.co.mjdk.aoc22.day07
 
-import uk.co.mjdk.aoc.aocInputStored
+import uk.co.mjdk.aoc.aocReader
 
 data class File(val name: String, val size: Int)
 data class Directory(val name: String, val childDirs: List<Directory>, val childFiles: List<File>) {
@@ -62,7 +62,7 @@ fun parseDirectory(name: String, iterator: Iterator<Instruction>): Directory {
 }
 
 fun parseRoot(): Directory {
-    aocInputStored(22, 7).useLines { lines ->
+    aocReader(22, 7).useLines { lines ->
         val instructionsIter = lines.map(Instruction::parse).iterator()
         assert(instructionsIter.next() == Instruction.Cd("/"))
         return parseDirectory("/", instructionsIter)
