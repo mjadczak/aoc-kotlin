@@ -1,10 +1,5 @@
 package uk.co.mjdk.aoc
 
-import java.io.BufferedReader
-import java.nio.charset.StandardCharsets
-
-
-
 
 fun Int.format(digits: Int) = "%0${digits}d".format(this)
 

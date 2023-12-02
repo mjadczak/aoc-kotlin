@@ -1,6 +1,5 @@
 package uk.co.mjdk.aoc
 
-import java.io.BufferedReader
 import java.io.Reader
 import java.net.CookieManager
 import java.net.HttpCookie
@@ -54,8 +53,8 @@ class AocClient {
         readInputFromCache(year, day) ?: fetchInput(year, day).also { writeInputToCache(year, day, it) }
 }
 
-fun aoc(year: Int, day: Int, trimNewLine: Boolean = true): String =
+fun aocString(year: Int, day: Int, trimNewLine: Boolean = true): String =
     AocClient().getInput(year, day).let { if (trimNewLine) it.trim() else it }
 
 // Old and busted, use the AocClient / aoc function, there is actually no need to read it in a buffered way...
-fun aocReader(year: Int, day: Int): Reader = aoc(year, day).reader()
+fun aocReader(year: Int, day: Int): Reader = aocString(year, day).reader()
