@@ -69,16 +69,14 @@ private class Schematic private constructor(
     }
 }
 
-fun main() = aoc(2023, 3) {
-    part1 { input ->
-        val board = Schematic.parse(input)
+fun main() = aoc(2023, 3, Schematic::parse) {
+    part1 { board ->
         board.numbers.filter { n ->
             n.coords.asSequence().flatMap { it.adjacent() }.any { board[it] is Symbol }
         }.sumOf { it.number }
     }
 
-    part2 { input ->
-        val board = Schematic.parse(input)
+    part2 { board ->
         board.symbols.filter { it.character == '*' }.mapNotNull { sym ->
             sym.coord.adjacent().mapNotNull { coord -> (board[coord] as? Number)?.number }.toSet() // toSet because otherwise we double-count the numbers
                 .takeIf { it.size == 2 }?.reduce(Int::times)

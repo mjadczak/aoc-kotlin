@@ -29,14 +29,16 @@ private data class Card(val id: Int, val winningNumbers: Set<Int>, val yourNumbe
     }
 }
 
-fun main() = aoc(2023, 4) {
-    part1 { input ->
-        input.lineSequence().map { Card.parse(it) }.sumOf { it.points }
+private fun getCards(input: String) = input.lineSequence().map { Card.parse(it) }
+
+fun main() = aoc(2023, 4, ::getCards) {
+    part1 { cards ->
+        cards.sumOf { it.points }
     }
 
-    part2 { input ->
+    part2 { cards ->
         val numCards = mutableMapOf<Int, Int>()
-        input.lineSequence().map { Card.parse(it) }.forEach { card ->
+        cards.forEach { card ->
             val numThisCard = numCards.compute(card.id) { _, num ->
                 (num ?: 0) + 1
             }!!

@@ -49,20 +49,19 @@ class Aoc<T>(
 
     fun runParts() {
         check(p1 != null || p2 != null)
-        // TODO sometimes we want to e.g. return a sequence from the parse function, and then this doesn't work so good!
-        val parsedInput by lazy { parse(aocString(year, day, trimNewLine)) }
-        val parsedExample by lazy { parse(example?.trim() ?: throw IllegalStateException("Did not provide example")) }
+        fun parsedInput() = parse(aocString(year, day, trimNewLine))
+        fun parsedExample() = parse(example?.trim() ?: throw IllegalStateException("Did not provide example"))
 
         p1?.let {
-            if (p1Example) it(parsedExample)
-            else it(parsedInput)
+            if (p1Example) it(parsedExample())
+            else it(parsedInput())
         }?.let {
             println("Part 1:\n$it\n")
         }
 
         p2?.let {
-            if (p2Example) it(parsedExample)
-            else it(parsedInput)
+            if (p2Example) it(parsedExample())
+            else it(parsedInput())
         }?.let {
             println("Part 2:\n$it\n")
         }

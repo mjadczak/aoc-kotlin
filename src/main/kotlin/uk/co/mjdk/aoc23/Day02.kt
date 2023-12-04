@@ -35,13 +35,12 @@ private data class Game(val id: Int, val rounds: List<Round>) {
     }
 }
 
-fun main() = aoc(2023, 2) {
-    fun getGames(input: String): List<Game> = input.lines().map { Game.parse(it) }
+private fun getGames(input: String): List<Game> = input.lines().map { Game.parse(it) }
 
-    part1 { input -> getGames(input).filter { it.isPossible }.sumOf { it.id } }
+fun main() = aoc(2023, 2, ::getGames) {
+    part1 { games -> games.filter { it.isPossible }.sumOf { it.id } }
 
-    part2 { input ->
-        getGames(input)
-            .sumOf { it.minRound.power }
+    part2 { games ->
+        games.sumOf { it.minRound.power }
     }
 }
