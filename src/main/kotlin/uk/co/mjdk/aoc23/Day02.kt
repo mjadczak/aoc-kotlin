@@ -6,6 +6,9 @@ private data class Round(val red: Int, val green: Int, val blue: Int) {
     val isPossible: Boolean
         get() = red <= 12 && green <= 13 && blue <= 14
 
+    val power: Int
+        get() = red * green * blue
+
     companion object {
         fun parse(input: String): Round {
             val colours = input.split(", ").map { it.split(' ') }.associate { (num, colour) ->
@@ -20,6 +23,9 @@ private data class Game(val id: Int, val rounds: List<Round>) {
     val isPossible: Boolean
         get() = rounds.all { it.isPossible }
 
+    val minRound: Round
+        get() = Round(rounds.maxOf { it.red }, rounds.maxOf { it.green }, rounds.maxOf { it.blue })
+
     companion object {
         fun parse(input: String): Game {
             val (gam, rounds) = input.split(": ")
@@ -33,4 +39,9 @@ fun main() = aoc(2023, 2) {
     fun getGames(input: String): List<Game> = input.lines().map { Game.parse(it) }
 
     part1 { input -> getGames(input).filter { it.isPossible }.sumOf { it.id } }
+
+    part2 { input ->
+        getGames(input)
+            .sumOf { it.minRound.power }
+    }
 }
