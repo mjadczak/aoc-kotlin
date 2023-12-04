@@ -33,4 +33,20 @@ fun main() = aoc(2023, 4) {
     part1 { input ->
         input.lineSequence().map { Card.parse(it) }.sumOf { it.points }
     }
+
+    part2 { input ->
+        val numCards = mutableMapOf<Int, Int>()
+        input.lineSequence().map { Card.parse(it) }.forEach { card ->
+            val numThisCard = numCards.compute(card.id) { _, num ->
+                (num ?: 0) + 1
+            }!!
+            val matching = card.yourWinningNumbers.size
+            (card.id + 1..<card.id + 1 + matching).forEach { id ->
+                numCards.compute(id) { _, num ->
+                    (num ?: 0) + numThisCard
+                }
+            }
+        }
+        numCards.values.sum()
+    }
 }
