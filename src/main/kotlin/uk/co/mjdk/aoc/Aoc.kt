@@ -53,17 +53,23 @@ class Aoc<T>(
         fun parsedExample() = parse(example?.trim() ?: throw IllegalStateException("Did not provide example"))
 
         p1?.let {
+            println("Part 1:")
+
             if (p1Example) it(parsedExample())
             else it(parsedInput())
         }?.let {
-            println("Part 1:\n$it\n")
+            println(it)
+            println()
         }
 
         p2?.let {
+            println("Part 2:")
+
             if (p2Example) it(parsedExample())
             else it(parsedInput())
         }?.let {
-            println("Part 2:\n$it\n")
+            println(it)
+            println()
         }
     }
 }
