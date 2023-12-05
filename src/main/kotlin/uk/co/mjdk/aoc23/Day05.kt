@@ -195,7 +195,6 @@ fun main() = aoc(2023, 5, ::parse) {
                 .map { (start, len) -> start..<(start + len) }
                 //.also(::println)
                 .let(::RangeSet)
-        println(seedRanges)
         mappers.fold(seedRanges) { r, mapper ->
             mapper(r)
             //.also { println("IN:\n\t$r\nMAP:\n\t$mapper\nOUT:\n\t$it\n") }

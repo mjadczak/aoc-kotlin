@@ -1,5 +1,7 @@
 package uk.co.mjdk.aoc
 
+import kotlin.time.measureTimedValue
+
 class Aoc<T>(
     private val year: Int,
     private val day: Int,
@@ -55,20 +57,26 @@ class Aoc<T>(
         p1?.let {
             println("Part 1:")
 
-            if (p1Example) it(parsedExample())
-            else it(parsedInput())
+            measureTimedValue {
+                if (p1Example) it(parsedExample())
+                else it(parsedInput())
+            }
         }?.let {
-            println(it)
+            println(it.value)
+            println("Computed in ${it.duration}")
             println()
         }
 
         p2?.let {
             println("Part 2:")
 
-            if (p2Example) it(parsedExample())
-            else it(parsedInput())
+            measureTimedValue {
+                if (p2Example) it(parsedExample())
+                else it(parsedInput())
+            }
         }?.let {
-            println(it)
+            println(it.value)
+            println("Computed in ${it.duration}")
             println()
         }
     }
