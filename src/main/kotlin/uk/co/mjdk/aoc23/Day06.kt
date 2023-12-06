@@ -15,19 +15,26 @@ private fun quadratic(a: Double, b: Double, c: Double): Pair<Double, Double> {
     return Pair(min(x1, x2), max(x1, x2))
 }
 
-private data class Race(val time: Int, val record: Int)
+private data class Race(val time: Long, val record: Long)
 
 private fun parseRaces(input: String): List<Race> {
     // TODO just write a "parse whitespace-separated list of ints" function
     val (t, r) = input.lines()
-    val ts = t.drop("Time:".length).trim().split(Regex("""\s+""")).map { it.toInt() }
-    val rs = r.drop("Distance:".length).trim().split(Regex("""\s+""")).map { it.toInt() }
+    val ts = t.drop("Time:".length).trim().split(Regex("""\s+""")).map { it.toLong() }
+    val rs = r.drop("Distance:".length).trim().split(Regex("""\s+""")).map { it.toLong() }
     return ts.zip(rs).map { (time, record) ->
         Race(time, record)
     }
 }
 
-private fun (Race).getNumBetterThanRecord(): Int {
+private fun parseOneRace(input: String): Race {
+    val (t, r) = input.lines()
+    val time = t.drop("Time:".length).trim().split(Regex("""\s+""")).joinToString("").toLong()
+    val record = r.drop("Distance:".length).trim().split(Regex("""\s+""")).joinToString("").toLong()
+    return Race(time, record)
+}
+
+private fun (Race).getNumBetterThanRecord(): Long {
     // the function of distance d vs time to hold button t, where T is the max time, is
     // d = t(T-t) = -t^2 + Tt
     // This is always an inverted quadratic
@@ -35,17 +42,22 @@ private fun (Race).getNumBetterThanRecord(): Int {
     // and find the number of the integers between t1 and t2 (not including t1 and t2)
 
     val (t1, t2) = quadratic(-1.0, time.toDouble(), -record.toDouble())
-    return ceil(t2 - 1).toInt() - floor(t1 + 1).toInt() + 1
+    return ceil(t2 - 1).toLong() - floor(t1 + 1).toLong() + 1
 }
 
-fun main() = aoc(2023, 6, ::parseRaces) {
-    example("""
+fun main() = aoc(2023, 6) {
+    example(
+        """
         Time:      7  15   30
         Distance:  9  40  200
-    """.trimIndent())
+    """.trimIndent()
+    )
 
+    part1 { input ->
+        parseRaces(input).map { it.getNumBetterThanRecord() }.reduce(Long::times)
+    }
 
-    part1 { races ->
-        races.map { it.getNumBetterThanRecord() }.reduce(Int::times)
+    part2 { input ->
+        parseOneRace(input).getNumBetterThanRecord()
     }
 }
