@@ -4,6 +4,7 @@ import uk.co.mjdk.aoc.aoc
 
 @Suppress("EnumEntryName")
 private enum class Card {
+    Joker,
     _2,
     _3,
     _4,
@@ -17,6 +18,8 @@ private enum class Card {
     Q,
     K,
     A;
+
+    fun jokered(): Card = if (this == J) Joker else this
 
     companion object {
         fun parse(input: Char): Card = if (input.isDigit()) Card.valueOf("_$input") else Card.valueOf(input.toString())
@@ -42,7 +45,16 @@ private data class Hand(val cards: List<Card>) {
 
     companion object {
         private fun computeHandType(cards: List<Card>): HandType {
-            val counts = cards.groupingBy { it }.eachCount().values.sortedDescending()
+            val groups = cards.groupingBy { it }.eachCount()
+            val jokers = groups[Card.Joker] ?: 0
+            val counts = groups.filterNot { it.key == Card.Joker }.values.sortedDescending().toMutableList()
+            // I think that the best place to put the jokers is always in the already-highest group
+            if (counts.isEmpty()) {
+                counts.add(jokers)
+            } else {
+                counts[0] += jokers
+            }
+
             return when (counts) {
                 listOf(5) -> HandType.FiveOfAKind
                 listOf(4, 1) -> HandType.FourOfAKind
@@ -70,7 +82,9 @@ private fun <T : Comparable<T>> listComparator(): Comparator<List<T>> = Comparat
 private val ScoringComparator: Comparator<Hand> =
     compareBy<Hand> { it.handType }.thenComparing({ it.cards }, listComparator())
 
-private data class Game(val hand: Hand, val bid: Int)
+private data class Game(val hand: Hand, val bid: Int) {
+    fun jokered(): Game = copy(hand = hand.copy(cards = hand.cards.map { it.jokered() }))
+}
 
 private fun parse(input: String): List<Game> = input.lines().map { line ->
     val (h, b) = line.split(" ")
@@ -78,9 +92,15 @@ private fun parse(input: String): List<Game> = input.lines().map { line ->
 }
 
 fun main() = aoc(2023, 7, ::parse) {
+    fun List<Game>.getWinnings(): Int = sortedWith(compareBy(ScoringComparator) { it.hand }).withIndex().sumOf {
+        (it.index + 1) * it.value.bid
+    }
+
     part1 { games ->
-        games.sortedWith(compareBy(ScoringComparator) { it.hand }).withIndex().sumOf {
-            (it.index + 1) * it.value.bid
-        }
+        games.getWinnings()
+    }
+
+    part2 { games ->
+        games.map { it.jokered() }.getWinnings()
     }
 }
