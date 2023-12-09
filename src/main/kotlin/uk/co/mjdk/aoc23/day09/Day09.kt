@@ -10,23 +10,30 @@ private fun parse(input: String): List<LongArray> =
 
 
 fun main() = aoc(2023, 9, ::parse) {
-    // it feels like there's something that could be done here
-    // with linear recurrence relations <=> polynomial/exponential equations,
-    // but let's just do naive solution for part 1 for now
+    fun LongArray.diffs(): LongArray {
+        require(this.size >= 2)
+        return LongArray(this.size - 1) { idx -> this[idx + 1] - this[idx] }
+    }
 
-    part1 { arys ->
-        fun LongArray.diffs(): LongArray {
-            require(this.size >= 2)
-            return LongArray(this.size - 1) { idx -> this[idx + 1] - this[idx] }
+    fun LongArray.nextNum(): Long =
+        if (this.all { it == 0L }) {
+            0
+        } else {
+            this.last() + this.diffs().nextNum()
         }
 
-        fun LongArray.nextNum(): Long =
-            if (this.all { it == 0L }) {
-                0
-            } else {
-                this.last() + this.diffs().nextNum()
-            }
+    fun LongArray.prevNum(): Long =
+        if (this.all { it == 0L }) {
+            0
+        } else {
+            this.first() - this.diffs().prevNum()
+        }
 
+    part1 { arys ->
         arys.sumOf { it.nextNum() }
+    }
+
+    part2 { arys ->
+        arys.sumOf { it.prevNum() }
     }
 }
