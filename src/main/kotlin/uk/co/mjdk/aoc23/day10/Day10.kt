@@ -136,9 +136,6 @@ fun main() = aoc(2023, 10, { Board(it) }) {
     }
 
     part2 { board ->
-        // scan across each row, dividing it into segments delineated by pipeline pipes and calculating the area inside
-        // to avoid a whole bunch of comparisons of which bits inside are pipe walls vs ground,
-        // we calculate the entire area including the pipes and then subtract the number of pipes
         val pipes = board.loopSeq().associateWith { board.getPipe(it) }
         val upDown = EnumSet.of(Dir.North, Dir.South)
 
