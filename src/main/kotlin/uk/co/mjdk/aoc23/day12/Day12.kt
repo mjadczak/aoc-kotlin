@@ -8,7 +8,22 @@ private data object Unknown : Condition
 private data object Operational : Known
 private data object Damaged : Known
 
-private data class Row(val springs: List<Condition>, val counts: List<Int>)
+private data class Row(val springs: List<Condition>, val counts: List<Int>) {
+    fun unfold(): Row = Row(
+        buildList(springs.size * 5 + 4) {
+            repeat(4) {
+                addAll(springs)
+                add(Unknown)
+            }
+            addAll(springs)
+        },
+        buildList(counts.size * 5) {
+            repeat(5) {
+                addAll(counts)
+            }
+        }
+    )
+}
 
 private fun parse(input: String): List<Row> = input.lines().map { line ->
     val (conds, nums) = line.split(" ")
@@ -110,22 +125,22 @@ private class ArrangementsComputer private constructor(private val row: Row) {
     }
 
     // For each State we might be in, and the choice we make, store the number of ways we can obtain the remaining groups (including any in-flight ones)
-    val memo = mutableMapOf<Pair<State, Known>, Int>()
+    val memo = mutableMapOf<Pair<State, Known>, Long>()
 
     // We could probably tabulate from the end rather than memoize from the start, but meh
 
-    private fun numArrangements(): Int {
+    private fun numArrangements(): Long {
         val initial = State(0, 0, 0)
         return numArrangements(initial)
     }
 
-    private fun numArrangements(nextResult: NextResult): Int = when (nextResult) {
+    private fun numArrangements(nextResult: NextResult): Long = when (nextResult) {
         Valid -> 1
         Invalid -> 0
         is Pending -> numArrangements(nextResult.state)
     }
 
-    private fun numArrangements(state: State): Int {
+    private fun numArrangements(state: State): Long {
         return when (val el = state.current) {
             is Known -> numArrangements(state.next(el))
             Unknown -> listOf(Operational, Damaged).sumOf { choice ->
@@ -137,13 +152,19 @@ private class ArrangementsComputer private constructor(private val row: Row) {
 
 
     companion object {
-        operator fun invoke(row: Row): Int = ArrangementsComputer(row).numArrangements()
+        operator fun invoke(row: Row): Long = ArrangementsComputer(row).numArrangements()
     }
 }
 
 fun main() = aoc(2023, 12, ::parse) {
     part1 { rows ->
         rows.sumOf { row ->
+            ArrangementsComputer(row)
+        }
+    }
+
+    part2 { rows ->
+        rows.map { it.unfold() }.sumOf { row ->
             ArrangementsComputer(row)
         }
     }
