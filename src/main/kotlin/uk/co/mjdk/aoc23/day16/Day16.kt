@@ -92,13 +92,21 @@ fun main() = aoc(2023, 16, { Board.parse(it) }) {
     """.trimIndent()
     )
 
-    part1 { board ->
-        data class State(val coord: Coord, val dir: Dir)
+    fun printEnergised(board: Board, visitedCells: Set<Coord>) {
+        (0..<board.rows).forEach { row ->
+            (0..<board.cols).forEach { col ->
+                if (Coord(row, col) in visitedCells) print("#") else print(".")
+            }
+            println()
+        }
+    }
 
+    data class State(val coord: Coord, val dir: Dir)
+
+    fun calculateEnergised(board: Board, initial: State): Int {
         val visitedCells = mutableSetOf<Coord>()
         val visitedStates = mutableSetOf<State>()
 
-        val initial = State(Coord(0, -1), Dir.Right)
         val queue = ArrayDeque<State>().apply { add(initial) }
 
         while (queue.isNotEmpty()) {
@@ -114,13 +122,25 @@ fun main() = aoc(2023, 16, { Board.parse(it) }) {
             }
         }
 
-//        (0..<board.rows).forEach { row ->
-//            (0..<board.cols).forEach { col ->
-//                if (Coord(row, col) in visitedCells) print("#") else print(".")
-//            }
-//            println()
-//        }
+        return visitedCells.size
+    }
 
-        visitedCells.size
+    part1 { board ->
+        calculateEnergised(board, State(Coord(0, -1), Dir.Right))
+    }
+
+    part2 { board ->
+        val starts = sequence {
+            // top down
+            yieldAll((0..<board.cols).map { State(Coord(-1, it), Dir.Down) })
+            // bottom up
+            yieldAll((0..<board.cols).map { State(Coord(board.rows, it), Dir.Up) })
+            // left right
+            yieldAll((0..<board.rows).map { State(Coord(it, -1), Dir.Right) })
+            // right left
+            yieldAll((0..<board.rows).map { State(Coord(it, board.cols), Dir.Left) })
+        }
+
+        starts.maxOf { calculateEnergised(board, it) }
     }
 }
