@@ -57,4 +57,4 @@ fun aocString(year: Int, day: Int, trimNewLine: Boolean = true): String =
     AocClient().getInput(year, day).let { if (trimNewLine) it.trim() else it }
 
 // Old and busted, use the AocClient / aoc function, there is actually no need to read it in a buffered way...
-fun aocReader(year: Int, day: Int): Reader = aocString(year, day).reader()
+fun aocReader(year: Int, day: Int): Reader = aocString(year + 2000, day).reader()
