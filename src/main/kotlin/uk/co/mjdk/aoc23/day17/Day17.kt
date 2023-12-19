@@ -49,19 +49,21 @@ fun main() = aoc(2023, 17, { Board.parse(it) }) {
     // Dijkstra, but each node in the graph needs to keep track of direction of movement + number of straight line moves so far
     // But this means we have multiple potential terminal nodes
 
-    part1 { board ->
-        data class State(val coord: Coord, val dirOnEnter: Dir, val numMovedStraightLine: Int) {
-            fun neighbours(): List<Pair<State, Int>> = dirOnEnter.allowedNext().mapNotNull { nextDir ->
-                State(
-                    coord + nextDir,
-                    nextDir,
-                    if (dirOnEnter == nextDir) numMovedStraightLine + 1 else 1
-                ).takeUnless { it.numMovedStraightLine > 3 }
-                    ?.let { nextState -> board[nextState.coord]?.let { nextState to it } }
-            }
-        }
+    data class State(val coord: Coord, val dirOnEnter: Dir, val numMovedStraightLine: Int)
 
+    fun Board.goal(): Coord = Coord(rows - 1, cols - 1)
+
+    fun bestPath(board: Board, isForbidden: (State, State) -> Boolean): Int {
         val initial = State(Coord(0, 0), Dir.Right, 0)
+
+        fun State.neighbours(): List<Pair<State, Int>> = dirOnEnter.allowedNext().mapNotNull { nextDir ->
+            State(
+                coord + nextDir,
+                nextDir,
+                if (dirOnEnter == nextDir) numMovedStraightLine + 1 else 1
+            ).takeUnless { isForbidden(this, it) }
+                ?.let { nextState -> board[nextState.coord]?.let { nextState to it } }
+        }
 
         val dist = mutableMapOf(initial to 0).withDefault { Int.MAX_VALUE }
         val visited = mutableSetOf<State>()
@@ -82,8 +84,25 @@ fun main() = aoc(2023, 17, { Board.parse(it) }) {
             }
         }
 
-        val terminals = dist.entries.filter { it.key.coord == Coord(board.rows - 1, board.cols - 1) }
+        val terminals = dist.entries.filter { it.key.coord == board.goal() }
 
-        terminals.minOf { it.value }
+        return terminals.minOf { it.value }
+    }
+
+    part1 { board ->
+        bestPath(board) { _, next -> next.numMovedStraightLine > 3 }
+    }
+
+    part2 { board ->
+        bestPath(board) { prev, next ->
+            // true if forbidden
+            when {
+                // max ten consecutive blocks
+                next.numMovedStraightLine > 10 -> true
+                // we are turning or stopping, so prev must have at least 4 consecutive blocks
+                next.coord == board.goal() || prev.dirOnEnter != next.dirOnEnter -> prev.numMovedStraightLine < 4
+                else -> false
+            }
+        }
     }
 }
