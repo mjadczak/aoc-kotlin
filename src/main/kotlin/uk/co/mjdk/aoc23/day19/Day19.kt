@@ -1,6 +1,7 @@
 package uk.co.mjdk.aoc23.day19
 
 import uk.co.mjdk.aoc.aoc
+import java.util.ArrayDeque
 
 private enum class Field {
     X,
@@ -80,5 +81,60 @@ fun main() = aoc(2023, 19, ::parse) {
                 workflows[workflowId]!!.process(item)
             }.first { it == "A" || it == "R" } == "A"
         }.sumOf { it.rating }
+    }
+
+    part2 { (workflowList, _) ->
+        val workflows = workflowList.associateBy { it.id }
+
+        data class MultiItem(val fields: Map<Field, IntRange>) {
+            val combinations: Long
+                get() = fields.values.map { it.count().toLong() }.reduce(Long::times)
+        }
+
+        val initial = MultiItem(
+            mapOf(
+                Field.X to 1..4000,
+                Field.M to 1..4000,
+                Field.A to 1..4000,
+                Field.S to 1..4000,
+            )
+        )
+
+        val queue = ArrayDeque<Pair<String, MultiItem>>()
+        queue.offer("in" to initial)
+        var total = 0L
+
+        // left: reject, right: accept
+        fun IntRange.split(op: Op, value: Int): Pair<IntRange, IntRange> = when (op) {
+            Op.Lt -> value..endInclusive to start..<value
+            Op.Gt -> start..value to (value + 1)..endInclusive
+        }
+
+        while (queue.isNotEmpty()) {
+            val (id, item) = queue.poll()
+            if (id == "A") {
+                total += item.combinations
+                continue
+            }
+            if (id == "R") {
+                continue
+            }
+
+            val workflow = workflows[id]!!
+            var remaining = item
+            for (rule in workflow.rules) {
+                if (remaining.combinations == 0L) break
+                val c = rule.condition
+                if (c == null) {
+                    queue.offer(rule.target to remaining)
+                    break
+                }
+                val (rejected, accepted) = remaining.fields[c.field]!!.split(c.op, c.value)
+                queue.offer(rule.target to MultiItem(remaining.fields + (c.field to accepted)))
+                remaining = MultiItem(remaining.fields + (c.field to rejected))
+            }
+        }
+
+        total
     }
 }
