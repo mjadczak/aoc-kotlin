@@ -2,6 +2,7 @@ package uk.co.mjdk.aoc23.day18
 
 import uk.co.mjdk.aoc.aoc
 import java.util.ArrayDeque
+import kotlin.math.absoluteValue
 
 private enum class Dir {
     Up,
@@ -11,11 +12,13 @@ private enum class Dir {
 }
 
 private data class Coord(val row: Int, val col: Int) {
-    operator fun plus(dir: Dir): Coord = when (dir) {
-        Dir.Up -> copy(row = row - 1)
-        Dir.Down -> copy(row = row + 1)
-        Dir.Right -> copy(col = col + 1)
-        Dir.Left -> copy(col = col - 1)
+    operator fun plus(dir: Dir): Coord = moved(dir, 1)
+
+    fun moved(dir: Dir, length: Int): Coord = when (dir) {
+        Dir.Up -> copy(row = row - length)
+        Dir.Down -> copy(row = row + length)
+        Dir.Right -> copy(col = col + length)
+        Dir.Left -> copy(col = col - length)
     }
 }
 
@@ -27,6 +30,18 @@ private value class Rgb(val value: Int) {
         get() = ((value and 0xff00) shr 8).toUByte()
     val b: UByte
         get() = (value and 0xff).toUByte()
+
+    val direction: Dir
+        get() = when (val v = value and 0xf) {
+            0 -> Dir.Right
+            1 -> Dir.Down
+            2 -> Dir.Left
+            3 -> Dir.Up
+            else -> throw IllegalArgumentException("$v not a dir (${value.toString(16)})")
+        }
+
+    val length: Int
+        get() = value shr 4
 
     companion object {
         fun parse(input: String): Rgb {
@@ -186,5 +201,49 @@ fun main() = aoc(2023, 18, ::parse) {
         }
 
         board.numHoles
+    }
+
+    part2 { items ->
+        // Essentially the shoelace formula, but simplified given we're axis-aligned.
+        // We count (wlog) horizontal edges, and add up the signed area of the rectangles from that horizontal edge
+        // to the bottom.
+        // Our "bottom" and "top" are likely either side of the 0 line, but the maths should still work out fine given
+        // we're dealing with the signed area.
+
+        // Also, we need to deal with the fact that our coordinates are not lines with no area, but edges of a shape
+        // - so we want our "vertex coordinates" to actually trace out an outline around the edges of the shape.
+        // To do this, we keep track of each corner - whether it's "right" (outside) or "left" (inside).
+        // Then the distance between each vertex increases by 1 when the edge is R -> R, decreases by 1 when it is L -> L,
+        // and stays the same otherwise.
+
+        // Otherwise we capture all the "bottom" and "left" edges but not the "top" and "right" ones.
+
+        // An alternative method which I've actually got working is to do the calculation without this correction (thus
+        // considering the area enclosed by lines through the _midpoints_ of the holes) and then correct for the missing
+        // area around the perimeter (1/2 square per perimeter square). This then gets tricky around the corners, but it turns
+        // out that this always just results in a missing 1 unit of area. This then turns out to just be an application of
+        // Pick's theorem.
+
+        // Above 0, Right -> Left adds area, and Left -> Right subtracts
+
+        val initial = Coord(0, 0)
+
+        val vertices = items.asSequence().runningFold(initial) { coord, item ->
+            coord.moved(item.colour.direction, item.colour.length)
+        } + initial
+
+        val area = vertices.zipWithNext { v1, v2 ->
+            when {
+                v1.col == v2.col -> 0L // vertical edge, no change
+                v1.row == v2.row -> (v1.col.toLong() - v2.col) * v1.row.toLong() // horizontal edge
+                else -> throw IllegalArgumentException("Non axis-aligned: $v1 $v2")
+            }
+        }.sum().absoluteValue
+
+        val perimeter = items.sumOf { it.colour.length.toLong() }
+        check(perimeter % 2 == 0L)
+
+
+        area + perimeter / 2 + 1
     }
 }
