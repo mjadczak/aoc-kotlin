@@ -107,7 +107,49 @@ fun main() = aoc(2023, 22, { input -> input.lines().map { Block.parse(it) } }) {
     """.trimIndent()
     )
 
-    part1 { blockList ->
+    class SupportDag {
+        private val supportsMap = mutableMapOf<Block, MutableSet<Block>>()
+        private val supportedByMap = mutableMapOf<Block, MutableSet<Block>>()
+        private val finalRestStart = mutableMapOf<Block, Int>()
+
+        val (Block).supportedBlocks: Set<Block>
+            get() = supportsMap[this] ?: emptySet()
+
+        val (Block).supportingBlocks: Set<Block>
+            get() = supportedByMap[this] ?: emptySet()
+
+        val (Block).finalBottom: Int
+            get() = (finalRestStart[this] ?: throw IllegalStateException(this@finalBottom.toString()))
+
+        val (Block).finalTop: Int
+            get() = finalBottom + height
+
+        val blocks: Set<Block>
+            get() = finalRestStart.keys
+
+        fun add(supporter: Block, supportee: Block) {
+            check(supporter in blocks)
+            if (supportee !in supporter.supportedBlocks) {
+                print("\t\t")
+                supporter.colour.printed { print(supporter) }
+                print(" -> ")
+                supportee.colour.printed { println(supportee) }
+            }
+            supportsMap.computeIfAbsent(supporter) { mutableSetOf() }.add(supportee)
+            supportedByMap.computeIfAbsent(supportee) { mutableSetOf() }.add(supporter)
+            val finalRest = supporter.finalTop + 1
+            finalRestStart[supportee]?.let { check(it == finalRest) }
+            finalRestStart[supportee] = finalRest
+        }
+
+        fun addBase(block: Block) {
+            print("\t\tGGGGGGGGGGG -> ")
+            block.colour.printed { println(block) }
+            finalRestStart[block] = 1
+        }
+    }
+
+    fun calcDag(blockList: List<Block>): SupportDag {
         // start from the bottom and move to the top 1 by 1, maintaining an XY "shadow" of the last block seen in each square
         // use this to construct a bidirectional supports/supported by graph
         val (xRange, yRange, zRange) = run {
@@ -132,44 +174,7 @@ fun main() = aoc(2023, 22, { input -> input.lines().map { Block.parse(it) } }) {
             Triple(minX..maxX, minY..maxY, minZ..maxZ)
         }
 
-        class SupportDag {
-            private val supportsMap = mutableMapOf<Block, MutableSet<Block>>()
-            private val supportedByMap = mutableMapOf<Block, MutableSet<Block>>()
-            private val finalRestStart = mutableMapOf<Block, Int>()
 
-            val (Block).supportedBlocks: Set<Block>
-                get() = supportsMap[this] ?: emptySet()
-
-            val (Block).supportingBlocks: Set<Block>
-                get() = supportedByMap[this] ?: emptySet()
-
-            val (Block).finalTop: Int
-                get() = (finalRestStart[this] ?: throw IllegalStateException(this@finalTop.toString())) + height
-
-            val blocks: Set<Block>
-                get() = finalRestStart.keys
-
-            fun add(supporter: Block, supportee: Block) {
-                check(supporter in blocks)
-                if (supportee !in supporter.supportedBlocks) {
-                    print("\t\t")
-                    supporter.colour.printed { print(supporter) }
-                    print(" -> ")
-                    supportee.colour.printed { println(supportee) }
-                }
-                supportsMap.computeIfAbsent(supporter) { mutableSetOf() }.add(supportee)
-                supportedByMap.computeIfAbsent(supportee) { mutableSetOf() }.add(supporter)
-                val finalRest = supporter.finalTop + 1
-                finalRestStart[supportee]?.let { check(it == finalRest) }
-                finalRestStart[supportee] = finalRest
-            }
-
-            fun addBase(block: Block) {
-                print("\t\tGGGGGGGGGGG -> ")
-                block.colour.printed { println(block) }
-                finalRestStart[block] = 1
-            }
-        }
 
         class Shadow {
             private val cells: MutableList<Block?> = MutableList(xRange.count() * yRange.count()) { null }
@@ -246,6 +251,11 @@ fun main() = aoc(2023, 22, { input -> input.lines().map { Block.parse(it) } }) {
             }
             println()
         }
+        return dag
+    }
+
+    part1 { blockList ->
+        val dag = calcDag(blockList)
 
         with(dag) {
             blocks.count { block ->
@@ -254,6 +264,27 @@ fun main() = aoc(2023, 22, { input -> input.lines().map { Block.parse(it) } }) {
                     check(block in supportedBlock.supportingBlocks)
                     supportedBlock.supportingBlocks.size > 1
                 }
+            }
+        }
+    }
+
+    part2 { blockList ->
+        val dag = calcDag(blockList)
+
+        with(dag) {
+            blocks.sumOf { destroyedBlock ->
+                val killed = mutableSetOf<Block>()
+                val queue = PriorityQueue<Block>(compareBy { it.finalBottom })
+                queue.offer(destroyedBlock)
+                while (queue.isNotEmpty()) {
+                    val block = queue.poll()
+                    if (block == destroyedBlock || killed.containsAll(block.supportingBlocks)) {
+                        block.supportedBlocks.forEach { queue.offer(it) }
+                        killed.add(block)
+                    }
+                }
+                killed.remove(destroyedBlock)
+                killed.size
             }
         }
     }
