@@ -31,14 +31,19 @@ enum class Cell {
     Free,
 }
 
-class Board(private val data: Array<Cell>, val cols: Int, val initialPos: Coord) {
+class Board(private val data: Array<Cell>, val cols: Int, val initialPos: Coord, val extraBlocked: Coord? = null) {
     val rows: Int = run {
         check(data.size % cols == 0)
         data.size / cols
     }
 
-    operator fun get(coord: Coord): Cell? =
-        if (coord.col in 0..<cols && coord.row in 0..<rows) data[coord.row * cols + coord.col] else null
+    operator fun get(coord: Coord): Cell? = when {
+        coord == extraBlocked -> Cell.Blocked
+        coord.col in 0..<cols && coord.row in 0..<rows -> data[coord.row * cols + coord.col]
+        else -> null
+    }
+
+    fun withBlocked(extraBlocked: Coord) = Board(data, cols, initialPos, extraBlocked)
 
     companion object {
         fun parse(input: String): Board {
@@ -66,19 +71,44 @@ class Board(private val data: Array<Cell>, val cols: Int, val initialPos: Coord)
     }
 }
 
+fun distinctPositions(board: Board): Set<Coord> {
+    var state = Guard(board.initialPos, Direction.Up)
+    val positions = mutableSetOf<Coord>()
+    while (true) {
+        positions.add(state.pos)
+        val forwardState = state.forward()
+        state = when (board[forwardState.pos]) {
+            null -> break
+            Cell.Free -> forwardState
+            Cell.Blocked -> state.turn()
+        }
+    }
+    return positions
+}
+
+fun checkIsLoop(board: Board): Boolean {
+    var state = Guard(board.initialPos, Direction.Up)
+    val states = mutableSetOf<Guard>()
+    while (true) {
+        if (state in states) return true
+        states.add(state)
+        val forwardState = state.forward()
+        state = when (board[forwardState.pos]) {
+            null -> break
+            Cell.Free -> forwardState
+            Cell.Blocked -> state.turn()
+        }
+    }
+    return false
+}
+
 fun main() = aoc(2024, 6, Board::parse) {
     part1 { board ->
-        var state = Guard(board.initialPos, Direction.Up)
-        val positions = mutableSetOf<Coord>()
-        while (true) {
-            positions.add(state.pos)
-            val forwardState = state.forward()
-            state = when (board[forwardState.pos]) {
-                null -> break
-                Cell.Free -> forwardState
-                Cell.Blocked -> state.turn()
-            }
-        }
-        positions.size
+        distinctPositions(board).size
+    }
+
+    part2 { board ->
+        val candidates = distinctPositions(board)
+        candidates.filterNot { it == board.initialPos }.filter { checkIsLoop(board.withBlocked(it)) }.size
     }
 }
