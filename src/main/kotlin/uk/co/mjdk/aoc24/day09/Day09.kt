@@ -84,4 +84,49 @@ fun main() = aoc(2024, 9, ::parseInput) {
         }
         workList.checksum()
     }
+
+    part2 { diskMap ->
+        val workList = diskMap.toCollection(LinkedList())
+        // trim any space
+        workList.trimEnd()
+        var nextId = workList.last().let { check(it is File); it.id }
+//        println(workList.render())
+        while (nextId >= 0) {
+            val candidatePos = workList.indexOfLast { it is File && it.id == nextId }
+            nextId--;
+            val candidate = workList[candidatePos]
+            check(candidate is File)
+            val pos = workList.indexOfFirst { it is Space && it.length >= candidate.length }
+            if (pos == -1 || pos >= candidatePos) {
+                continue
+            }
+            run {
+                var space = candidate.length
+                workList.getOrNull(candidatePos + 1)?.takeIf { it is Space }?.length?.also {
+                    space += it
+                    workList.removeAt(candidatePos + 1)
+                }
+                workList.getOrNull(candidatePos - 1)?.takeIf { it is Space }?.length.also {
+                    if (it == null) {
+                        workList[candidatePos] = Space(space)
+                    } else {
+                        space += it
+                        workList.removeAt(candidatePos)
+                        workList[candidatePos - 1] = Space(space)
+                    }
+                }
+            }
+            val space = workList[pos]
+            check(space is Space)
+            if (space.length == candidate.length) {
+                workList[pos] = candidate
+            } else {
+                workList[pos] = Space(space.length - candidate.length)
+                workList.add(pos, candidate)
+            }
+            workList.trimEnd()
+//            println(workList.render())
+        }
+        workList.checksum()
+    }
 }
