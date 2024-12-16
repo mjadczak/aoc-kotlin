@@ -58,6 +58,28 @@ private class Computation(val board: Board) {
     fun computeOrGet(coord: Coord): Set<Coord> = memo[coord] ?: compute(coord).also { memo[coord] = it }
 }
 
+private class Computation2(val board: Board) {
+    private val memo = mutableMapOf<Coord, Set<List<Coord>>>()
+    private fun compute(coord: Coord): Set<List<Coord>> {
+        val height = board[coord] ?: throw IllegalArgumentException(coord.toString())
+        check(height <= 9)
+        if (height == 9) return setOf(listOf(coord))
+
+        return listOf(
+            coord.copy(row = coord.row + 1),
+            coord.copy(row = coord.row - 1),
+            coord.copy(col = coord.col + 1),
+            coord.copy(col = coord.col - 1),
+        ).mapNotNull { candCoord ->
+            board[candCoord]?.takeIf { it == height + 1 }?.let {
+                computeOrGet(candCoord).mapTo(mutableSetOf()) { list -> list + coord }
+            }
+        }.fold(emptySet()) { a, b -> a.union(b) }
+    }
+
+    fun computeOrGet(coord: Coord): Set<List<Coord>> = memo[coord] ?: compute(coord).also { memo[coord] = it }
+}
+
 fun main() = aoc(2024, 10, Board::parse) {
     example(
         """
@@ -74,6 +96,11 @@ fun main() = aoc(2024, 10, Board::parse) {
 
     part1 { board ->
         val computation = Computation(board)
+        board.trailheads.sumOf { t -> computation.computeOrGet(t).size }
+    }
+
+    part2 { board ->
+        val computation = Computation2(board)
         board.trailheads.sumOf { t -> computation.computeOrGet(t).size }
     }
 }
