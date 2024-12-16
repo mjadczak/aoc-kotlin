@@ -43,6 +43,15 @@ fun List<Long>.blink(): List<Long> = buildList {
     }
 }
 
+data class Key(val stone: Long, val blinks: Int)
+
+val cache = mutableMapOf<Key, Long>()
+fun totalNum(key: Key): Long = if (key.blinks == 0) 1L
+else listOf(key.stone).blink().sumOf { st -> getTotalNum(Key(st, key.blinks - 1)) }
+
+
+fun getTotalNum(key: Key): Long = cache[key] ?: totalNum(key).also { cache[key] = it }
+
 fun main() = aoc(2024, 11, { input -> input.split(" ").map { it.toLong() } }) {
     example("125 17")
 
@@ -52,5 +61,9 @@ fun main() = aoc(2024, 11, { input -> input.split(" ").map { it.toLong() } }) {
             current = current.blink()
         }
         current.size
+    }
+
+    part2 { stones ->
+        stones.map { st -> Key(st, 75) }.sumOf(::getTotalNum)
     }
 }
