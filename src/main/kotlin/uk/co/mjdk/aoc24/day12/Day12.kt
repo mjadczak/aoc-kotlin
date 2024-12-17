@@ -41,9 +41,8 @@ class Board(private val data: CharArray, val rows: Int) {
             val char = data[i]
             val coord = i.toCoord()
 
-            val adjacent = coord.adjacent
-                .filter { this[it] == char }
-                .mapNotNull { c -> regionData[c.toIdx()]?.let { c to it } }
+            val adjacent =
+                coord.adjacent.filter { this[it] == char }.mapNotNull { c -> regionData[c.toIdx()]?.let { c to it } }
 
             val thisRegion = adjacent.map { it.second }.plus(Region(char, setOf(coord))).reduce(Region::merge)
             thisRegion.coords.forEach { regionData[it.toIdx()] = thisRegion }
@@ -64,6 +63,10 @@ class Board(private val data: CharArray, val rows: Int) {
     }
 }
 
+enum class Side(val horizontal: Boolean) {
+    Top(true), Bottom(true), Left(false), Right(false)
+}
+
 fun main() = aoc(2024, 12, Board::parse) {
     example(
         """
@@ -82,6 +85,30 @@ fun main() = aoc(2024, 12, Board::parse) {
                 coord.adjacent.count { board.region(it) != region }
             }
             area * perimeter
+        }
+    }
+
+    part2 { board ->
+        board.regions.sumOf { region ->
+            val area = region.coords.size
+            val perimeterSides = region.coords.flatMap { coord ->
+                listOfNotNull(
+                    coord.copy(row = coord.row - 1).takeIf { board.region(it) != region }
+                        ?.let { coord to Side.Top },
+                    coord.copy(row = coord.row + 1).takeIf { board.region(it) != region }
+                        ?.let { coord to Side.Bottom },
+                    coord.copy(col = coord.col - 1).takeIf { board.region(it) != region }
+                        ?.let { coord to Side.Left },
+                    coord.copy(col = coord.col + 1).takeIf { board.region(it) != region }
+                        ?.let { coord to Side.Right },
+                )
+            }
+            val sides = perimeterSides.groupBy(
+                { it.second to (if (it.second.horizontal) it.first.row else it.first.col) },
+                { if (it.second.horizontal) it.first.col else it.first.row }).values.sumOf { vs ->
+                vs.sorted().zipWithNext { a, b -> b != a + 1 }.count { it } + 1
+            }
+            area * sides
         }
     }
 }
