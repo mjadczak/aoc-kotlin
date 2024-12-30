@@ -4,6 +4,7 @@ import uk.co.mjdk.aoc.aoc
 import java.util.PriorityQueue
 import kotlin.collections.filterNot
 import kotlin.collections.forEach
+import kotlin.math.min
 
 data class Coord(val row: Int, val col: Int) {
     fun move(direction: Direction): Coord = when (direction) {
@@ -98,30 +99,62 @@ class Board(private val data: Array<Cell>, val rows: Int, val start: Coord, val 
     }
 }
 
-fun main() = aoc(2024, 16, Board::parse) {
-    part1 { board ->
-        val initial = State(board.start, Direction.East)
-        val dist = mutableMapOf(initial to 0).withDefault { Int.MAX_VALUE }
-        val visited = mutableSetOf<State>()
-        val queue = PriorityQueue<State>(compareBy { dist.getValue(it) }).also { it.add(initial) }
+data class NodeState(val predecessors: Set<State>, val cost: Int)
 
-        fun State.neighbours(): Sequence<Pair<State, Int>> = next().filter { board[it.first.pos] == Cell.Space }
-        while (queue.isNotEmpty()) {
-            val thisNode = queue.poll()
-            visited.add(thisNode)
+fun computeDistances(board: Board): Map<State, NodeState> {
+    val initial = State(board.start, Direction.East)
+    val dist = mutableMapOf<State, NodeState>(initial to NodeState(emptySet(), 0)).withDefault {
+        NodeState(
+            emptySet(),
+            Int.MAX_VALUE
+        )
+    }
+    val visited = mutableSetOf<State>()
+    val queue = PriorityQueue<State>(compareBy { dist.getValue(it).cost }).also { it.add(initial) }
 
-            thisNode.neighbours().filterNot { it.first in visited }.forEach { (nextState, cost) ->
-                val alt = dist.getValue(thisNode).also { check(it != Int.MAX_VALUE) } + cost
-                if (alt < dist.getValue(nextState)) {
-                    dist[nextState] = alt
-                    queue.remove(nextState)
-                    queue.offer(nextState)
-                }
+    fun State.neighbours(): Sequence<Pair<State, Int>> = next().filter { board[it.first.pos] == Cell.Space }
+    while (queue.isNotEmpty()) {
+        val thisNode = queue.poll()
+        visited.add(thisNode)
+
+        thisNode.neighbours().filterNot { it.first in visited }.forEach { (nextState, cost) ->
+            val altCost =
+                dist.getValue(thisNode).also { check(it.cost != Int.MAX_VALUE) }.let { it.cost + cost }
+            val currentNodeState = dist.getValue(nextState)
+            when {
+                altCost > currentNodeState.cost -> null
+                altCost == currentNodeState.cost -> currentNodeState.copy(predecessors = currentNodeState.predecessors + thisNode)
+                else -> NodeState(setOf(thisNode), altCost)
+            }?.let { nextNodeState ->
+                dist[nextState] = nextNodeState
+                queue.remove(nextState)
+                queue.offer(nextState)
             }
         }
+    }
+    return dist
+}
 
+fun main() = aoc(2024, 16, Board::parse) {
+    part1 { board ->
+        val dist = computeDistances(board)
         val terminals = dist.entries.filter { it.key.pos == board.end }
+        terminals.minOf { it.value.cost }
+    }
 
-        terminals.minOf { it.value }
+    part2 { board ->
+        val dist = computeDistances(board)
+        val terminals = dist.entries.filter { it.key.pos == board.end }
+        val minDist = terminals.minOf { it.value.cost }
+        val queue = ArrayDeque(terminals.filter { it.value.cost == minDist }.map { (k, v) -> k to v })
+        val positions = mutableSetOf<Coord>()
+
+        while (queue.isNotEmpty()) {
+            val next = queue.removeFirst()
+            positions.add(next.first.pos)
+            queue.addAll(next.second.predecessors.map { it to dist.getValue(it) })
+        }
+
+        positions.size
     }
 }
