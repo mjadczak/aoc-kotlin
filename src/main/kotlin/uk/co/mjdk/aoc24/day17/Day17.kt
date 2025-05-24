@@ -2,6 +2,8 @@ package uk.co.mjdk.aoc24.day17
 
 import org.apache.commons.math3.util.ArithmeticUtils.pow
 import uk.co.mjdk.aoc.aoc
+import kotlin.jvm.optionals.getOrNull
+import kotlin.streams.asStream
 
 enum class Instruction(val opcode: Int) {
     adv(0),
@@ -118,9 +120,36 @@ class Machine(
     }
 }
 
+fun render(prog: List<Int>): String = buildString {
+    check(prog.size % 2 == 0)
+    prog.chunked(2).forEachIndexed { idx, (inst, op) ->
+        val instruction = Instruction(inst)
+        val opVal = if (instruction in setOf(
+                Instruction.adv,
+                Instruction.bst,
+                Instruction.out,
+                Instruction.bdv,
+                Instruction.cdv
+            ) && op in 4..6
+        ) {
+            when (op) {
+                4 -> "A"
+                5 -> "B"
+                6 -> "C"
+                else -> throw IllegalStateException("Unknown opcode $op")
+            }
+        } else if (instruction == Instruction.bxc) "" else op.toString()
+        appendLine("${idx * 2}: $instruction $opVal")
+    }
+}
+
 fun main() = aoc(2024, 17, Machine::parse) {
     part1 { machine ->
         machine.processAll()
         machine.output.joinToString(",")
+    }
+
+    part2 { machine ->
+        render(machine.program)
     }
 }
