@@ -26,7 +26,7 @@ fun <T> Collection<T>.repeatForever(): Sequence<T> = sequence {
     }
 }
 
-infix fun Int.mod(other: Int): Int {
+infix fun Int.arithMod(other: Int): Int {
     val res = this % other
     return if (res < 0) {
         res + other

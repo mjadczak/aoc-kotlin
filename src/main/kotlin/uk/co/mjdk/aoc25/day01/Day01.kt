@@ -4,6 +4,7 @@ import me.alllex.parsus.parser.*
 import me.alllex.parsus.token.literalToken
 import me.alllex.parsus.token.regexToken
 import uk.co.mjdk.aoc.aoc
+import uk.co.mjdk.aoc.arithMod
 
 enum class Direction {
     Left,
@@ -54,8 +55,27 @@ fun main() = aoc(2025, 1, { grammar.parse(it).getOrElse { error(it) } }) {
         rotations
             .asSequence()
             .scan(50) { pos, rot ->
-                (pos + rot.offset) % 100
+                (pos + rot.offset) arithMod 100
             }
             .count { it == 0 }
+    }
+
+    part2 { rotations ->
+        var count = 0
+        var position = 50
+        for (r in rotations) {
+            val initial = position
+            count += r.amount / 100
+            val modOffset = r.offset % 100
+            val extendedPos = position + modOffset
+            position = (position + modOffset) arithMod 100
+            val didClick = when {
+                extendedPos <= 0 && initial > 0 -> true
+                extendedPos >= 100 -> true
+                else -> false
+            }
+            if (didClick) count += 1
+        }
+        count
     }
 }
