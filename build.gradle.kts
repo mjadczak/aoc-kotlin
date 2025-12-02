@@ -1,6 +1,6 @@
 plugins {
     application
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.2.21"
 }
 
 group = "uk.co.mjdk"
@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
 }
 
