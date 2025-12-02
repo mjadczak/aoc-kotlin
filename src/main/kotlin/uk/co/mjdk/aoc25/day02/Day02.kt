@@ -26,6 +26,40 @@ fun pow10(power: Int): Long {
     return res
 }
 
+fun Int.factors(): Sequence<Int> {
+    require(this > 0)
+    val num = this
+    return (1..num).asSequence().filter { num % it == 0 }
+}
+
+fun Long.groupings(digits: Int): Sequence<Long> {
+    require(digits > 0)
+    var num = this
+    require(num > 0)
+    val divisor = pow10(digits)
+    return sequence {
+        while (num > 0) {
+            yield(num % divisor)
+            num /= divisor
+        }
+
+    }
+}
+
+fun <T : Any> Sequence<T>.allEqual(): Boolean {
+    var initial: T? = null
+    for (el in this) {
+        if (initial == null) {
+            initial = el
+            continue
+        }
+        if (initial != el) {
+            return false
+        }
+    }
+    return true
+}
+
 val grammar = object : Grammar<List<LongRange>>() {
     val long by regexToken("[0-9]+").map { it.text.toLong() }
     val dash by literalToken("-")
@@ -48,5 +82,20 @@ fun main() = aoc(2025, 2, { grammar.parse(it).getOrElse { e -> error(e) } }) {
                     }
                 }.sum()
             }
+    }
+
+    part2 { ranges ->
+        fun isInvalid(id: Long): Boolean {
+            val numDigits = id.numDigits()
+            return numDigits.factors().filterNot { it == numDigits }.any { groupSize ->
+                id.groupings(groupSize).allEqual()
+            }
+        }
+
+        ranges
+            .asSequence()
+            .flatMap { it.asSequence() }
+            .filter { isInvalid(it) }
+            .sum()
     }
 }
