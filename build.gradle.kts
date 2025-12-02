@@ -13,6 +13,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
+    implementation("me.alllex.parsus:parsus:0.6.1") // TODO a year of unreleased changes on the github!
 }
 
 kotlin {

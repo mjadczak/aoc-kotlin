@@ -25,3 +25,12 @@ fun <T> Collection<T>.repeatForever(): Sequence<T> = sequence {
         yieldAll(this@repeatForever)
     }
 }
+
+infix fun Int.mod(other: Int): Int {
+    val res = this % other
+    return if (res < 0) {
+        res + other
+    } else {
+        res
+    }
+}
