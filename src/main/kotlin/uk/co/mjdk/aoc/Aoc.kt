@@ -1,5 +1,7 @@
 package uk.co.mjdk.aoc
 
+import me.alllex.parsus.parser.Grammar
+import me.alllex.parsus.parser.getOrThrow
 import kotlin.time.measureTimedValue
 
 class Aoc<T>(
@@ -94,4 +96,14 @@ inline fun <T> aoc(
     block: (Aoc<T>).() -> Unit
 ) {
     Aoc(year, day, trimNewLine, parse).apply(block).runParts()
+}
+
+inline fun <T> aoc(
+    year: Int,
+    day: Int,
+    grammar: Grammar<T>,
+    trimNewLine: Boolean = true,
+    block: (Aoc<T>).() -> Unit
+) {
+    aoc(year, day, { input -> grammar.parse(input).getOrThrow() }, trimNewLine, block)
 }

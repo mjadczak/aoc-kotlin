@@ -68,7 +68,7 @@ val grammar = object : Grammar<List<LongRange>>() {
     override val root: Parser<List<LongRange>> by zeroOrMore(range * -optional(sep))
 }
 
-fun main() = aoc(2025, 2, { grammar.parse(it).getOrElse { e -> error(e) } }) {
+fun main() = aoc(2025, 2, grammar) {
     part1 { ranges ->
         ranges
             .sumOf { range ->

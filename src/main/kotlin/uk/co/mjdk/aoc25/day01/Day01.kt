@@ -50,7 +50,7 @@ val grammar = object : Grammar<List<Rotation>>() {
     override val root by rotations
 }
 
-fun main() = aoc(2025, 1, { grammar.parse(it).getOrElse { error(it) } }) {
+fun main() = aoc(2025, 1, grammar) {
     part1 { rotations ->
         rotations
             .asSequence()
