@@ -46,6 +46,19 @@ class Board(val numCols: Int, private val cells: List<Cell>) {
     operator fun get(coord: Coord): Cell? = coord.index?.let { cells[it] }
     fun getOrEmpty(coord: Coord): Cell = get(coord) ?: Cell.Empty
 
+    fun removing(coords: Iterable<Coord>): Board {
+        val indicesToRemove: Set<Int> = coords.mapTo(mutableSetOf()) { it.index ?: error("$it out of bounds") }
+        val newCells = cells.mapIndexed { index, cell ->
+            if (index in indicesToRemove) {
+                check(cell == Cell.Paper) { "$index was not Paper!" }
+                Cell.Empty
+            } else {
+                cell
+            }
+        }
+        return Board(numCols, newCells)
+    }
+
     companion object {
         fun parse(input: String): Board {
             val lines = input.lineSequence()
@@ -64,10 +77,27 @@ class Board(val numCols: Int, private val cells: List<Cell>) {
     }
 }
 
+fun Board.isAccessiblePaperRoll(coord: Coord): Boolean =
+    getOrEmpty(coord) == Cell.Paper && coord.adjacent.count { getOrEmpty(it) == Cell.Paper } < 4
+
 fun main() = aoc(2025, 4, Board::parse) {
     part1 { board ->
         board.allCoords.count { coord ->
-            board.getOrEmpty(coord) == Cell.Paper && coord.adjacent.count { board.getOrEmpty(it) == Cell.Paper } < 4
+            board.isAccessiblePaperRoll(coord)
         }
+    }
+
+    part2 { initialBoard ->
+        var board = initialBoard
+        var removed = 0
+        while (true) {
+            val toRemove = board.allCoords.filter { board.isAccessiblePaperRoll(it) }.toList()
+            if (toRemove.isEmpty()) {
+                break
+            }
+            removed += toRemove.size
+            board = board.removing(toRemove)
+        }
+        removed
     }
 }
