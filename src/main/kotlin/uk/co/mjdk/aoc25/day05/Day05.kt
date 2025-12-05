@@ -32,6 +32,8 @@ class MultiRange(ranges: Iterable<LongRange>) {
         val range = rangeMap.floorEntry(id)?.value ?: return false
         return id in range
     }
+
+    val size: Long get() = rangeMap.values.sumOf { it.last - it.first + 1L }
 }
 
 fun main() = aoc(2025, 5, object : Grammar<Input>() {
@@ -46,5 +48,10 @@ fun main() = aoc(2025, 5, object : Grammar<Input>() {
     part1 { input ->
         val mr = MultiRange(input.ranges)
         input.ids.count { it in mr }
+    }
+
+    part2 { input ->
+        val mr = MultiRange(input.ranges)
+        mr.size
     }
 }
