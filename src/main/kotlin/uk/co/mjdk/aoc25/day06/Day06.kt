@@ -1,7 +1,5 @@
 package uk.co.mjdk.aoc25.day06
 
-import me.alllex.parsus.parser.*
-import me.alllex.parsus.token.*
 import uk.co.mjdk.aoc.aoc
 
 enum class Operator {
@@ -19,7 +17,7 @@ data class Problem(
     }
 }
 
-data class Input(
+data class Input1(
     val operandRows: List<List<Long>>,
     val operatorRow: List<Operator>,
 ) {
@@ -32,8 +30,8 @@ data class Input(
     }
 
     companion object {
-        fun parse(input: String): Input {
-            val lines = input.lines()
+        fun parse(input: String): Input1 {
+            val lines = input.trim().lines()
             val operandRows = lines.dropLast(1).map { line ->
                 line.trim().split("\\s+".toRegex()).map(String::toLong)
             }
@@ -44,13 +42,48 @@ data class Input(
                     else -> error(it)
                 }
             }
-            return Input(operandRows, operatorRow)
+            return Input1(operandRows, operatorRow)
         }
     }
 }
 
-fun main() = aoc(2025, 6, Input::parse) {
-    part1 { input ->
-        input.problems.sumOf { it.calculate() }
+fun parse2(input: String): Sequence<Problem> = sequence {
+    val lines = input.lineSequence().filterNot(String::isEmpty).toList()
+    val operandLines = lines.dropLast(1)
+    val operators = lines.last().trim().split("\\s+".toRegex()).map {
+        when (it) {
+            "+" -> Operator.Add
+            "*" -> Operator.Multiply
+            else -> error(it)
+        }
+    }
+
+    var charIdx = 0
+    operators.forEach { operator ->
+        val numbers = buildList {
+            while (charIdx < operandLines.first().length) {
+                val operand = operandLines
+                    .map { it[charIdx] }
+                    .filter { it.isDigit() }
+                    .let {
+                        if (it.isEmpty()) null else it.joinToString("").toLong()
+                    }
+                charIdx++
+                if (operand == null) break
+                add(operand)
+            }
+        }
+        check(numbers.isNotEmpty()) { "Failed at idx = $charIdx" }
+        yield(Problem(numbers, operator))
+    }
+}
+
+fun main() = aoc(2025, 6, trimString = false) {
+    part1 { str ->
+        Input1.parse(str).problems.sumOf { it.calculate() }
+    }
+
+    part2 { str ->
+        parse2(str).sumOf { it.calculate() }
     }
 }
