@@ -1,13 +1,12 @@
 package uk.co.mjdk.aoc
 
 import me.alllex.parsus.parser.Grammar
-import me.alllex.parsus.parser.getOrThrow
 import kotlin.time.measureTimedValue
 
 class Aoc<T>(
     private val year: Int,
     private val day: Int,
-    private val trimNewLine: Boolean,
+    private val trimString: Boolean,
     private val parse: (String) -> T
 ) {
     private var p1: ((T) -> Any)? = null
@@ -53,7 +52,7 @@ class Aoc<T>(
 
     fun runParts() {
         check(p1 != null || p2 != null)
-        fun parsedInput() = parse(aocString(year, day, trimNewLine))
+        fun parsedInput() = parse(aocString(year, day, trimString))
         fun parsedExample() = parse(example?.trim() ?: throw IllegalStateException("Did not provide example"))
 
         p1?.let {
@@ -84,26 +83,26 @@ class Aoc<T>(
     }
 }
 
-inline fun aoc(year: Int, day: Int, trimNewLine: Boolean = true, block: (Aoc<String>).() -> Unit) {
-    Aoc(year, day, trimNewLine) { it }.apply(block).runParts()
+inline fun aoc(year: Int, day: Int, trimString: Boolean = true, block: (Aoc<String>).() -> Unit) {
+    Aoc(year, day, trimString) { it }.apply(block).runParts()
 }
 
 inline fun <T> aoc(
     year: Int,
     day: Int,
     noinline parse: (String) -> T,
-    trimNewLine: Boolean = true,
+    trimString: Boolean = true,
     block: (Aoc<T>).() -> Unit
 ) {
-    Aoc(year, day, trimNewLine, parse).apply(block).runParts()
+    Aoc(year, day, trimString, parse).apply(block).runParts()
 }
 
 inline fun <T> aoc(
     year: Int,
     day: Int,
     grammar: Grammar<T>,
-    trimNewLine: Boolean = true,
+    trimString: Boolean = true,
     block: (Aoc<T>).() -> Unit
 ) {
-    aoc(year, day, { input -> grammar.parse(input).getOrThrow() }, trimNewLine, block)
+    aoc(year, day, { input -> grammar.parseOrThrow(input) }, trimString, block)
 }
