@@ -98,8 +98,34 @@ class MutableStateTracker(val setup: Setup) {
     }
 }
 
+class MutableQuantumTracker(val setup: Setup) {
+    private val cache: MutableMap<Coord, Long> = mutableMapOf()
+
+    private fun numPossibilities(beamStart: Coord): Long =
+        cache[beamStart] ?: calcNumPossibilities(beamStart).also { cache[beamStart] = it }
+
+    private fun calcNumPossibilities(beamStart: Coord): Long {
+        var current = beamStart
+        while (current in setup) {
+            if (setup[current] == BoardPos.Splitter) {
+                // stop processing this beam, and queue up the sides
+                return current.sides.sumOf { numPossibilities(it) }
+            }
+            current = current.next
+        }
+        return 1L // we got to the bottom of the board without hitting a splitter
+    }
+
+    fun calculate(): Long = numPossibilities(setup.start)
+}
+
 fun main() = aoc(2025, 7, Setup::parse) {
     part1 { setup ->
         MutableStateTracker(setup).also { it.calculate() }.numTimesSplit
+    }
+
+    part2 { setup ->
+        val tracker = MutableQuantumTracker(setup)
+        tracker.calculate()
     }
 }
