@@ -39,7 +39,7 @@ class Board(val numCols: Int, private val cells: List<Cell>) {
             }
         }
 
-    private val Coord.indexUnsafe: Int get() = row * numRows + col
+    private val Coord.indexUnsafe: Int get() = row * numCols + col
     private val Coord.index: Int? get() = if (contains(this)) indexUnsafe else null
 
     operator fun contains(coord: Coord): Boolean = coord.row in rowIndices && coord.col in colIndices
