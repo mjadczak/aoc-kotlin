@@ -106,4 +106,24 @@ fun main() = aoc(2025, 8, object : Grammar<List<Box>>() {
             .map { it.boxes.size.toLong() }
             .reduce { a, b -> a * b }
     }
+
+    part2 { boxes ->
+        val pairs =
+            boxes
+                .asSequence()
+                .flatMap { a -> boxes.asSequence().map { b -> BoxPair(a, b) } }
+                .filterNot { bp -> bp.a == bp.b }
+                .toSet()
+        val pq = PriorityQueue(pairs)
+        val circuits = MutableCircuitSet(boxes.toSet())
+        var lastPair: BoxPair? = null
+        while (circuits.numCircuits > 1) {
+            requireNotNull(pq.poll()) { "No more pairs?" }.let {
+                circuits.connect(it.a, it.b)
+                lastPair = it
+            }
+        }
+        checkNotNull(lastPair)
+        lastPair.a.x * lastPair.b.x
+    }
 }
