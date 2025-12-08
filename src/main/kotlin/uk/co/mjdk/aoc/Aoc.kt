@@ -53,7 +53,9 @@ class Aoc<T>(
     fun runParts() {
         check(p1 != null || p2 != null)
         fun parsedInput() = parse(aocString(year, day, trimString))
-        fun parsedExample() = parse(example?.trim() ?: throw IllegalStateException("Did not provide example"))
+        fun parsedExample() = parse(example?.let {
+            if (trimString) it.trim() else it
+        } ?: throw IllegalStateException("Did not provide example"))
 
         p1?.let {
             println("Part 1:")
