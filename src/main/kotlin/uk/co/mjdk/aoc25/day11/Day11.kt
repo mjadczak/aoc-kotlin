@@ -28,4 +28,31 @@ fun main() = aoc(2025, 11, object : Grammar<Graph>() {
         }
         numPaths("you")
     }
+
+    part2 { graph ->
+        // no cycles! so all paths must be svr -> fft -> dac -> out
+        // and further, can divide up the graph by reachability
+        fun numPaths(current: String, to: String, visited: MutableSet<String>, knownPast: Set<String>): Long {
+            if (current == to) return 1L
+            return graph.edges.getValue(current).filterNot { it in knownPast }.sumOf { next ->
+                visited.add(next)
+                numPaths(next, to, visited, knownPast)
+            }
+        }
+
+        data class PartResult(val from: String, val to: String, val numPaths: Long, val visitedBetween: Set<String>) {
+            val summary: String get() = "$from -> $to: $numPaths paths, ${visitedBetween.size} nodes"
+        }
+
+        fun numPaths2(from: String, to: String, reachableFromTo: Set<String> = emptySet()): PartResult {
+            val visited = mutableSetOf<String>()
+            val numPaths = numPaths(from, to, visited, reachableFromTo)
+            return PartResult(from, to, numPaths, visited)
+        }
+
+        val dacOut = numPaths2("dac", "out").also { println(it.summary) }
+        val fftDac = numPaths2("fft", "dac", dacOut.visitedBetween).also { println(it.summary) }
+        val svrFft = numPaths2("svr", "fft", dacOut.visitedBetween + fftDac.visitedBetween).also { println(it.summary) }
+        dacOut.numPaths * fftDac.numPaths * svrFft.numPaths
+    }
 }
